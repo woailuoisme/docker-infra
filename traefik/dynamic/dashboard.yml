@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Traefik v3 Dashboard 仪表盘路由配置 (Dashboard Router)
+# ==============================================================================
+
+http:
+  routers:
+    traefik-dashboard:
+      rule: 'Host(`traefik.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: api@internal
+      tls: {}
+      middlewares:
+        - chain-basic@file

@@ -1,0 +1,103 @@
+# Centrifugo v6 生产级配置
+# 官方参考: https://centrifugal.dev/docs/server/configuration
+
+# 传输协议配置 (Transports)
+websocket:
+  use_write_buffer_pool: true
+  message_size_limit: 65536  # 64KB 单条消息上限，防止 DoS
+
+uni_websocket:
+  enabled: true
+
+http_stream:
+  enabled: true
+
+sse:
+  enabled: true
+
+uni_sse:
+  enabled: true
+
+# 消息引擎配置 (通过环境变量 CENTRIFUGO_ENGINE_REDIS_ADDRESS 动态注入连接)
+engine:
+  type: redis
+  redis:
+    connect_timeout: "1s"
+    io_timeout: "4s"
+
+# 客户端长连接与安全控制
+client:
+  allow_anonymous_connect_without_token: false
+  allowed_origins: []  # 跨域白名单通过环境变量注入
+  ping_interval: 30s
+  pong_timeout: 8s
+  connection_limit: 10000
+  user_connection_limit: 10
+  queue_max_size: 1048576  # 1MB 客户端单连接发送缓冲区上限
+  stale_close_delay: "10s"
+
+# 管理后台与可观测性
+admin:
+  enabled: true
+  handler_prefix: "/admin"
+
+health:
+  enabled: true
+
+prometheus:
+  enabled: true
+
+# 日志配置
+log:
+  level: info
+
+# 通道命名空间策略 (Channel Namespaces)
+channel:
+  history_meta_ttl: "720h"  # 30 天历史元数据保存
+  
+  namespaces:
+    # public: 公共大厅/广播场景，开启断线消息自动补偿 (recovery)，仅允许服务端 API 发布
+    - name: public
+      presence: true
+      join_leave: true
+      history_size: 100
+      history_ttl: "300s"
+      allow_recovery: true
+      force_recovery: true
+      allow_publish_for_subscriber: false
+      allow_subscribe_for_client: true
+      allow_subscribe_for_anonymous: false
+      allow_publish_for_anonymous: false
+    
+    # private: 私有与敏感业务频道，须凭订阅 Token 准入，禁用客户端直接 publish
+    - name: private
+      presence: true
+      join_leave: true
+      history_size: 50
+      history_ttl: "300s"
+      allow_recovery: true
+      force_recovery: true
+      allow_publish_for_subscriber: false
+      allow_subscribe_for_client: false
+    
+    # user: 用户个人通知频道，关闭 presence 和 join_leave 节省存储与网络开销
+    - name: user
+      presence: false
+      join_leave: false
+      history_size: 50
+      history_ttl: "300s"
+      allow_recovery: true
+      force_recovery: true
+      allow_publish_for_subscriber: false
+      allow_subscribe_for_client: false
+    
+    # notification: 瞬时消息/Toast 提醒，高吞吐量，关闭恢复以减轻 Valkey 压力
+    - name: notification
+      presence: false
+      join_leave: false
+      history_size: 10
+      history_ttl: "60s"
+      allow_recovery: false
+      force_recovery: false
+      allow_publish_for_subscriber: false
+      allow_subscribe_for_client: true

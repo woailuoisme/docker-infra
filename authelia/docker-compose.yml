@@ -1,0 +1,43 @@
+services:
+  authelia:
+    image: authelia/authelia:${AUTHELIA_VERSION:-4.39}
+    container_name: authelia
+    restart: always
+    environment:
+      - X_AUTHELIA_CONFIG_FILTERS=template
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - DOMAIN=${SITE_ADDRESS}
+      - JWT_SECRET=${AUTHELIA_JWT_SECRET}
+      - SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
+      - STORAGE_ENCRYPTION_KEY=${AUTHELIA_STORAGE_ENCRYPTION_KEY}
+      - REDIS_HOST=${REDIS_HOST:-valkey}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_USER_NAME=${RESEND_USER_NAME:-resend}
+    volumes:
+      # 仓库自包含配置只读挂载 (防篡改且无需依赖外部全局绝对路径)
+      - ./config:/config:ro
+      - ${DATA_PATH:-./data/}authelia:/data
+    ports:
+      # 默认绑定本地回环 127.0.0.1，外部流量统一通过反向代理网关 (Traefik / Caddy) 接入
+      - "${AUTHELIA_BIND:-127.0.0.1}:${AUTHELIA_PORT:-9091}:9091"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:9091/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 64M
+    depends_on:
+      valkey:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend

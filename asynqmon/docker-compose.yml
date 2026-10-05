@@ -1,0 +1,31 @@
+services:
+  asynqmon:
+    image: hibiken/asynqmon:${ASYNQMON_VERSION:-0.7.2}
+    container_name: asynqmon
+    # 官方镜像暂未提供原生 arm64 架构支持，需在 Apple Silicon / ARM 宿主机下模拟 amd64 运行
+    platform: linux/amd64
+    restart: always
+    command:
+      - "--redis-addr=${ASYNQMON_REDIS_ADDR:-valkey:6379}"
+      - "--redis-password=${REDIS_PASSWORD}"
+      - "--redis-db=${ASYNQMON_REDIS_DB:-0}"
+    ports:
+      # 默认绑定本地回环 127.0.0.1，防范 Asynqmon 无鉴权管理后台向公网暴露
+      - "${ASYNQMON_BIND:-127.0.0.1}:${ASYNQMON_PORT:-8500}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:8080/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 32M
+    depends_on:
+      valkey:
+        condition: service_healthy
+    networks:
+      - backend

@@ -1,0 +1,51 @@
+services:
+  centrifugo:
+    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION:-v6.9}
+    container_name: centrifugo
+    restart: always
+    command: centrifugo -c /centrifugo/config.yaml
+    volumes:
+      # 仓库自包含配置只读挂载 (防篡改且无需依赖外部全局绝对路径)
+      - ./config.yaml:/centrifugo/config.yaml:ro
+    ports:
+      # Centrifugo WebSocket / SSE / HTTP API 统一接入端口
+      - "${CENTRIFUGO_PORT:-48000}:8000"
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      # 默认使用 redis 引擎 (生产连接 Valkey)，可在开发环境中切换为 memory
+      - CENTRIFUGO_ENGINE_TYPE=${CENTRIFUGO_ENGINE_TYPE:-redis}
+      # 密钥与安全凭证
+      - CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY=${CENTRIFUGO_TOKEN_HMAC_SECRET_KEY}
+      - CENTRIFUGO_HTTP_API_KEY=${CENTRIFUGO_API_KEY}
+      - CENTRIFUGO_ADMIN_PASSWORD=${CENTRIFUGO_ADMIN_PASSWORD}
+      - CENTRIFUGO_ADMIN_SECRET=${CENTRIFUGO_ADMIN_SECRET}
+      # Redis 引擎的 Valkey 连接地址 (单实例 / 哨兵 / 集群)
+      - CENTRIFUGO_ENGINE_REDIS_ADDRESS=redis://:${REDIS_PASSWORD}@valkey:6379/0
+      # CORS 跨域白名单 (JSON 数组格式)
+      - CENTRIFUGO_CLIENT_ALLOWED_ORIGINS=["${CENTRIFUGO_ALLOWED_ORIGINS:-*}"]
+      - CENTRIFUGO_LOG_LEVEL=${CENTRIFUGO_LOG_LEVEL:-info}
+      # 匿名连接安全控制：默认禁止未授权客户端连入
+      - CENTRIFUGO_CLIENT_ALLOW_ANONYMOUS_CONNECT_WITHOUT_TOKEN=${CENTRIFUGO_ALLOW_ANONYMOUS_CONNECT_WITHOUT_TOKEN:-false}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 64M
+    depends_on:
+      valkey:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend

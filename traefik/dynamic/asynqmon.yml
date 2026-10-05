@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Asynqmon 异步任务队列监控面板路由配置 (Asynqmon Router & Service)
+# 受 Authelia SSO 统一保护 (chain-auth@file)
+# ==============================================================================
+
+http:
+  routers:
+    asynqmon:
+      rule: 'Host(`asynq.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: asynqmon-service
+      tls: {}
+      middlewares:
+        - chain-auth@file
+
+  services:
+    asynqmon-service:
+      loadBalancer:
+        servers:
+          - url: "http://asynqmon:8080"
+        passHostHeader: true

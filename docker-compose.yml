@@ -1,0 +1,43 @@
+# ==============================================================================
+# 基础设施与云原生全栈服务编排 (Cloud-Native Infrastructure Stack)
+# ==============================================================================
+
+include:
+  # --- 1. 网络与反向代理网关 (Edge Gateway & Ingress) ---
+  - traefik/docker-compose.yml             # Traefik v3 边缘网关、HTTP/3、动态路由与 Let's Encrypt 证书签发
+
+  # --- 2. 安全合规与入侵防御 (Security & Compliance) ---
+  - crowdsec/docker-compose.yml            # CrowdSec 行为分析、恶意 IP 自动化封禁与 AppSec WAF
+  - authelia/docker-compose.yml            # Authelia 2FA / SSO 单点登录与 Web 前置鉴权代理
+
+  # --- 3. 核心持久化与数据库 (Databases & Storage) ---
+  - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
+  - pgbackups/docker-compose.yml           # PostgreSQL 自动化定时备份与多层轮转归档
+  - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
+  - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
+
+  # --- 4. 实时通信、消息队列与工作流 (Messaging & Workflows) ---
+  - centrifugo/docker-compose.yml          # Centrifugo v6 实时 WebSocket / SSE 广播引擎
+  - mosquitto/docker-compose.yml           # Eclipse Mosquitto MQTT 物联网与设备消息 Broker
+  - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
+  - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
+
+  # --- 5. 全文检索与动态媒体渲染 (Search & Media Processing) ---
+  - meilisearch/docker-compose.yml         # Meilisearch 高性能轻量全文搜索引擎
+  - imgproxy/docker-compose.yml            # imgproxy 快速安全动态图片缩放、格式协商与裁剪服务
+
+  # --- 6. 统一可观测性与运维监控 (Observability & Ops) ---
+  - otel-collector/docker-compose.yml      # OpenTelemetry Collector 统一遥测日志/指标/追踪收集与清洗
+  - open-observe/docker-compose.yml        # OpenObserve 极简云原生日志分析与时序指标观测平台
+  - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
+
+# ------------------------------------------------------------------------------
+# 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
+# ------------------------------------------------------------------------------
+networks:
+  frontend:
+    name: frontend
+    driver: bridge
+  backend:
+    name: backend
+    driver: bridge

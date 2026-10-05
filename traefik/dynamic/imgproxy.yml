@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Imgproxy 动态图片缩放与格式协商服务路由配置 (Imgproxy Router & Service)
+# 使用 chain-basic@file (安全响应头 + 压缩 + 错误重试)
+# ==============================================================================
+
+http:
+  routers:
+    imgproxy:
+      rule: 'Host(`img.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: imgproxy-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    imgproxy-service:
+      loadBalancer:
+        servers:
+          - url: "http://imgproxy:8080"
+        passHostHeader: true

@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# OpenObserve 云原生可观测性平台路由配置 (OpenObserve Router & Service)
+# 提供日志、时序指标与链路追踪看板，使用基础安全与压缩链路 (chain-basic@file)
+# ==============================================================================
+
+http:
+  routers:
+    openobserve:
+      rule: 'Host(`logs.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: openobserve-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    openobserve-service:
+      loadBalancer:
+        servers:
+          - url: "http://openobserve:5080"
+        passHostHeader: true

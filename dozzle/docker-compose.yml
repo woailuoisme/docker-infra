@@ -1,0 +1,32 @@
+services:
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:${DOZZLE_VERSION:-v10}
+    restart: always
+    ports:
+      # 默认仅绑定本地回环 127.0.0.1，由反向代理统一暴露并受 Authelia / SSO 双重保护
+      - "${DOZZLE_BIND:-127.0.0.1}:${DOZZLE_PORT:-8180}:8080"
+    volumes:
+      # 只读挂载 Docker 守护进程 Unix Socket，消除未定义的 proxy 外部依赖
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # 认证鉴权下沉至网关层 (Authelia SSO)，容器内部精简免配置
+      DOZZLE_ENABLE_ACTIONS: true
+      DOZZLE_ENABLE_SHELL: true
+      DOZZLE_NO_ANALYTICS: true
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
+    networks:
+      - backend
+      - frontend

@@ -1,0 +1,51 @@
+services:
+  openobserve:
+    image: openobserve/openobserve:${OPENOBSERVE_VERSION:-v1.0.4}
+    container_name: openobserve
+    restart: always
+    environment:
+      # 初始管理员凭证 (来自 .env)
+      - ZO_ROOT_USER_EMAIL=${OPENOBSERVE_ROOT_EMAIL:?请在 .env 设置 OPENOBSERVE_ROOT_EMAIL（需带真实域名）}
+      - ZO_ROOT_USER_PASSWORD=${OPENOBSERVE_ROOT_PASSWORD:?请在 .env 设置 OPENOBSERVE_ROOT_PASSWORD}
+      # 节点模式与架构：启用单机全功能模式，遥测数据持久化至 Garage S3 (Parquet 格式)
+      - ZO_LOCAL_MODE=true
+      - ZO_LOCAL_MODE_STORAGE=s3
+      - ZO_NODE_ROLE=all
+      # 对象存储 (Garage S3，Parquet 切片持久化)
+      - ZO_S3_PROVIDER=s3
+      - ZO_S3_SERVER_URL=http://garage:3900
+      - ZO_S3_BUCKET_NAME=default
+      - ZO_S3_REGION_NAME=garage
+      - ZO_S3_ACCESS_KEY=${GARAGE_DEFAULT_ACCESS_KEY}
+      - ZO_S3_SECRET_KEY=${GARAGE_DEFAULT_SECRET_KEY}
+      # 压缩合并与遥测控制
+      - ZO_COMPACT_ENABLED=true
+      - ZO_TELEMETRY=false
+      - ZO_DATA_DIR=/data
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    volumes:
+      # 本地目录用于元数据持久化与 Parquet 写入缓冲
+      - ${DATA_PATH:-./data/}open-observe:/data
+    ports:
+      # 默认限制本地监听，外部由网关 (Traefik / Caddy) 反代接入
+      - "${OPENOBSERVE_BIND:-127.0.0.1}:${OPENOBSERVE_PORT:-5080}:5080"
+    healthcheck:
+      test: ["CMD", "/openobserve", "node", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      garage:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.2"
+          memory: 512M

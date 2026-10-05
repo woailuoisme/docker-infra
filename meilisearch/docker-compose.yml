@@ -1,0 +1,30 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch:${MEILI_VERSION:-v1.54}
+    container_name: meilisearch
+    restart: always
+    command: meilisearch --config-file-path /meili_config/config.toml
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    ports:
+      - "${MEILI_PORT:-127.0.0.1:7700}:7700"
+    volumes:
+      - ./config.toml:/meili_config/config.toml:ro
+      - ${DATA_PATH:-./data/}meili_data:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:7700/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+        reservations:
+          memory: 256M
+    networks:
+      - frontend
+      - backend

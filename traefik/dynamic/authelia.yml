@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Authelia 统一身份鉴权与登录门户路由 (Authelia Router & Service)
+# ==============================================================================
+
+http:
+  routers:
+    authelia:
+      rule: 'Host(`auth.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: authelia-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    authelia-service:
+      loadBalancer:
+        servers:
+          - url: "http://authelia:9091"
+        passHostHeader: true

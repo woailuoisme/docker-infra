@@ -1,0 +1,27 @@
+services:
+  valkey:
+    image: valkey/valkey:${VALKEY_VERSION:-9.1-alpine}
+    container_name: valkey
+    restart: always
+    command:
+      - valkey-server
+      - /etc/valkey/valkey.conf
+      - --requirepass
+      - ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    # 内存双保险：配置层 maxmemory 256mb + 容器层限额 384mb（预留自身数据结构与网络缓冲区开销）
+    mem_limit: 384mb
+    volumes:
+      - ./valkey.conf:/etc/valkey/valkey.conf:ro
+      - ${DATA_PATH:-./data/}valkey:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli $${REDIS_PASSWORD:+-a \"$$REDIS_PASSWORD\"} ping | grep -q PONG || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    # 仅走 backend 容器内网通信 (valkey:6379)，不暴露宿主机端口，杜绝公网弱口令扫描风险
+    networks:
+      - backend

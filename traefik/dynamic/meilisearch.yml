@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Meilisearch 高性能全文搜索引擎 HTTP 接口路由配置 (Meilisearch Router & Service)
+# 挂载 chain-api@file 中间件链路 (支持 CORS 跨域请求头与突发并发保护)
+# ==============================================================================
+
+http:
+  routers:
+    meilisearch:
+      rule: 'Host(`search.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: meilisearch-service
+      tls: {}
+      middlewares:
+        - chain-api@file
+
+  services:
+    meilisearch-service:
+      loadBalancer:
+        servers:
+          - url: "http://meilisearch:7700"
+        passHostHeader: true

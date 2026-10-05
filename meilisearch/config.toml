@@ -1,0 +1,22 @@
+# 基础运行
+db_path = "/meili_data/data.ms"
+env = "production"
+http_addr = "0.0.0.0:7700"
+no_analytics = true
+http_payload_size_limit = "10 MB"
+log_level = "INFO"
+
+# 资源与并发限制 (防 OOM)
+max_indexing_memory = "256 MiB"
+max_indexing_threads = 1
+
+# 数据快照 (每天自动备份)
+dump_dir = "/meili_data/dumps/"
+snapshot_dir = "/meili_data/snapshots/"
+schedule_snapshot = 86400
+
+# 性能调优特性
+experimental_reduce_indexing_memory_usage = true
+experimental_max_number_of_batched_tasks = 10
+experimental_search_queue_size = 100
+experimental_enable_metrics = true
