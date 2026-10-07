@@ -7,9 +7,9 @@
 
 http:
   routers:
-    # --- Garage S3 API (供 S3 客户端 / SDK 访问，透传 Host 头) ---
+    # --- Garage S3 API (供 S3 客户端 / SDK 访问，支持 Path-style 与 Virtual-host-style 子域名) ---
     garage-s3:
-      rule: 'Host(`s3.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`s3.{{ env "SITE_ADDRESS" }}`) || HostRegexp(`^[a-z0-9.-]+\.s3\.{{ env "SITE_ADDRESS" }}$`)'
       entryPoints:
         - websecure
       service: garage-s3-service

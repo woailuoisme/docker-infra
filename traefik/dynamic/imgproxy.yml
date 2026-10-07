@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Imgproxy 动态图片缩放与格式协商服务路由配置 (Imgproxy Router & Service)
-# 使用 chain-basic@file (安全响应头 + 压缩 + 错误重试)
+# 使用 chain-api@file (安全响应头 + 压缩 + 错误重试 + CORS 跨域请求头 + 速率限制)
 # ==============================================================================
 
 http:
@@ -13,7 +13,7 @@ http:
       service: imgproxy-service
       tls: {}
       middlewares:
-        - chain-basic@file
+        - chain-api@file
 
   services:
     imgproxy-service:

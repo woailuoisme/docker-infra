@@ -1,13 +1,38 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Centrifugo 实时消息推送引擎路由配置 (Centrifugo WebSocket / SSE / HTTP API)
-# 支持客户端长链接、WebSocket 握手升级，透传 Host 头
+# 支持客户端长链接、WebSocket 握手升级，浏览器访问根路径自动跳转 /admin/
 # ==============================================================================
 
 http:
   routers:
+    # 浏览器访问 Web 管理后台 (/admin/*) 受 Authelia SSO 统一保护
+    centrifugo-admin:
+      rule: 'Host(`ws.{{ env "SITE_ADDRESS" }}`) && PathPrefix(`/admin`)'
+      priority: 100
+      entryPoints:
+        - websecure
+      service: centrifugo-service
+      tls: {}
+      middlewares:
+        - chain-auth@file
+
+    # 浏览器访问根路径 / 自动跳转至 Web 管理后台并受 Authelia 保护
+    centrifugo-root:
+      rule: 'Host(`ws.{{ env "SITE_ADDRESS" }}`) && Path(`/`)'
+      priority: 110
+      entryPoints:
+        - websecure
+      service: centrifugo-service
+      tls: {}
+      middlewares:
+        - chain-auth@file
+        - centrifugo-redirect-admin
+
+    # Centrifugo 核心客户端通信路由 (WebSocket / SSE / HTTP API / Health)
     centrifugo:
       rule: 'Host(`ws.{{ env "SITE_ADDRESS" }}`)'
+      priority: 10
       entryPoints:
         - websecure
       service: centrifugo-service
@@ -15,9 +40,16 @@ http:
       middlewares:
         - chain-basic@file
 
+  middlewares:
+    centrifugo-redirect-admin:
+      redirectRegex:
+        regex: "^https?://([^/]+)/?$"
+        replacement: "https://${1}/admin/"
+        permanent: false
+
   services:
     centrifugo-service:
       loadBalancer:
+        passHostHeader: true
         servers:
           - url: "http://centrifugo:8000"
-        passHostHeader: true

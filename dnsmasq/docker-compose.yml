@@ -1,0 +1,16 @@
+services:
+  dns:
+    build:
+      context: .
+    container_name: dns
+    restart: always
+    ports:
+      - "5354:53/udp"
+      - "5354:53/tcp"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf:ro
+    networks:
+      - backend
+      - frontend

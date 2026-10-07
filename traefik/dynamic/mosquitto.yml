@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Eclipse Mosquitto MQTT 消息 Broker 路由配置 (MQTT over WebSocket)
+# 允许前端 Web / IoT 浏览器客户端通过 wss://mqtt.<domain> 进行长连接通信
+# ==============================================================================
+
+http:
+  routers:
+    mosquitto-ws:
+      rule: 'Host(`mqtt.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: mosquitto-ws-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    mosquitto-ws-service:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://mosquitto:9001"

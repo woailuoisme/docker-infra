@@ -1,6 +1,6 @@
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:${OTEL_VERSION:-0.161.0}
+    image: otel/opentelemetry-collector-contrib:${OTEL_VERSION:-0.162.0}
     container_name: otel-collector
     restart: always
     command: ["--config=/etc/otelcol-contrib/config.yaml"]

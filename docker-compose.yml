@@ -5,7 +5,7 @@
 include:
   # --- 1. 网络与反向代理网关 (Edge Gateway & Ingress) ---
   - traefik/docker-compose.yml             # Traefik v3 边缘网关、HTTP/3、动态路由与 Let's Encrypt 证书签发
-
+  - dnsmasq/docker-compose.yml             # DNSMasq 本地 DNS 解析服务
   # --- 2. 安全合规与入侵防御 (Security & Compliance) ---
   - crowdsec/docker-compose.yml            # CrowdSec 行为分析、恶意 IP 自动化封禁与 AppSec WAF
   - authelia/docker-compose.yml            # Authelia 2FA / SSO 单点登录与 Web 前置鉴权代理

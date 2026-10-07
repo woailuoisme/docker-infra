@@ -9,9 +9,8 @@ services:
       # 默认绑定本地回环 127.0.0.1，统一经反向代理网关 (Traefik) 实现边缘缓存与加速
       - "${IMGPROXY_BIND:-127.0.0.1}:${IMGPROXY_PORT:-8088}:8080"
     environment:
-      # 签名安全凭证 (HMAC-SHA256 签名计算，生产环境强烈建议在 .env 中覆盖)
-      - IMGPROXY_KEY=${IMGPROXY_KEY:-016bb66d0d40f8f746c0c327eca2232495bb367e90f5d0124329a0fea07c929b}
-      - IMGPROXY_SALT=${IMGPROXY_SALT:-07c466cebbed802f7b449c67dfad29f393df60f09ffbd2af47462f88791e3ab5}
+      - IMGPROXY_KEY=${IMGPROXY_KEY}
+      - IMGPROXY_SALT=${IMGPROXY_SALT}
       # 是否允许未签名 URL 访问 (开发调试设为 true，生产环境可在 .env 中重写为 false)
       - IMGPROXY_INSECURE_URLS=${IMGPROXY_INSECURE_URLS:-true}
       # 开发错误调试模式 (响应 Header 及日志中输出详细错误堆栈)
@@ -23,8 +22,7 @@ services:
       - IMGPROXY_ENABLE_AVIF_DETECTION=${IMGPROXY_ENABLE_AVIF_DETECTION:-true}
     volumes:
       # 业务上传文件与本地媒体只读挂载
-      - ${DATA_PATH:-./data/}:/mnt/data:ro
-      - ${APP_CODE_PATH:-./}:/mnt/www:ro
+      - ${DATA_PATH}:/mnt/data:ro
     healthcheck:
       test: ["CMD", "imgproxy", "health"]
       interval: 10s

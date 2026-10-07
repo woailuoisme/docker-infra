@@ -8,8 +8,7 @@ services:
       - TZ=${TIMEZONE:-Asia/Shanghai}
       # 启用 SQLite WAL (Write-Ahead Logging) 模式，提升并发读写吞吐，杜绝数据库锁冲突
       - USE_WAL=true
-      # 声明式自动注册 Traefik Bouncer 认证密钥 (免手动运行 cscli)
-      - BOUNCER_KEY_traefik=${CROWDSEC_BOUNCER_KEY_TRAEFIK:-${CROWDSEC_BOUNCER_KEY:-crowdsec-traefik-bouncer-dev-secret-key-32ch}}
+      - BOUNCER_KEY_traefik=${CROWDSEC_BOUNCER_KEY}
     volumes:
       # 持久化数据与运行时配置
       - ${DATA_PATH:-./data/}crowdsec/data:/var/lib/crowdsec/data

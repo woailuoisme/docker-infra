@@ -13,8 +13,8 @@ services:
       - ${DATA_PATH:-./data/}mosquitto/data:/mosquitto/data
     environment:
       - TZ=${TIMEZONE:-Asia/Shanghai}
-      - MQTT_USERNAME=${MQTT_USERNAME:-admin}
-      - MQTT_PASSWORD=${MQTT_PASSWORD:-}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "mosquitto_sub -h localhost -p 1883 -u \"$$MQTT_USERNAME\" -P \"$$MQTT_PASSWORD\" -t '$$SYS/broker/version' -C 1 -W 3 > /dev/null 2>&1"]
       interval: 30s

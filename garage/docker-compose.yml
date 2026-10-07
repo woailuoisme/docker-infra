@@ -20,9 +20,9 @@ services:
       - ${DATA_PATH:-./data/}garage:/var/lib/garage
     environment:
       # 密钥凭据: 支持由 .env 动态重写覆盖 garage.toml，保障生产安全与密钥轮换
-      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:-5368ea7003a35eebcaf25c618fab1c3ad1dbae01b8fc5d1fba4c737e5a955751}
-      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN:-A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ=}
-      GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN:-VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4=}
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN}
       # 自动化初始化单节点与默认存储桶凭据
       GARAGE_DEFAULT_ACCESS_KEY: ${GARAGE_DEFAULT_ACCESS_KEY}
       GARAGE_DEFAULT_SECRET_KEY: ${GARAGE_DEFAULT_SECRET_KEY}
@@ -68,7 +68,7 @@ services:
       S3_REGION: "garage"
       CONFIG_PATH: "/etc/garage.toml"
       # 敏感令牌优先从环境变量读取并与 garage 保持严格同步
-      API_ADMIN_KEY: "${GARAGE_ADMIN_TOKEN:-A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ=}"
+      API_ADMIN_KEY: "${GARAGE_ADMIN_TOKEN}"
       # 可选内置认证: username:bcrypt_hash (生产环境通常由上层反向代理或 Authelia 统一鉴权)
       # AUTH_USER_PASS: "${GARAGE_WEBUI_AUTH_USER_PASS:-}"
     depends_on:
