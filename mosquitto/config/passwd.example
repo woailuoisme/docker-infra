@@ -7,7 +7,7 @@
 # 3. 生产环境中该文件权限建议设置为 0600 或 0640。
 #
 # ------------------------------------------------------------------------------
-# 推荐生成命令（在当前 docker/mosquitto 目录下执行）：
+# 推荐生成命令（在当前 mosquitto 目录下执行）：
 #
 # 首次创建文件并设置 admin 密码：
 #   docker run --rm -v "$(pwd)/config:/mosquitto/config" eclipse-mosquitto:2 mosquitto_passwd -c -b /mosquitto/config/passwd admin <YOUR_PASSWORD>

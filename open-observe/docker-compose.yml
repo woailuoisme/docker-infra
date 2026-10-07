@@ -27,7 +27,7 @@ services:
       # 本地目录用于元数据持久化与 Parquet 写入缓冲
       - ${DATA_PATH:-./data/}open-observe:/data
     ports:
-      # 默认限制本地监听，外部由网关 (Traefik / Caddy) 反代接入
+      # 默认限制本地监听，外部由网关 (Traefik) 反代接入
       - "${OPENOBSERVE_BIND:-127.0.0.1}:${OPENOBSERVE_PORT:-5080}:5080"
     healthcheck:
       test: ["CMD", "/openobserve", "node", "status"]

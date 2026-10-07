@@ -60,6 +60,7 @@ http:
           - "Remote-Groups"
           - "Remote-Name"
           - "Remote-Email"
+        maxResponseBodySize: 2097152
 
     # --------------------------------------------------------------------------
     # 6. Authelia API 基础认证 (ForwardAuth API / BasicAuth Mode)
@@ -75,6 +76,7 @@ http:
           - "Remote-Groups"
           - "Remote-Name"
           - "Remote-Email"
+        maxResponseBodySize: 2097152
 
     # --------------------------------------------------------------------------
     # 7. 内网 IP 白名单 (IP AllowList - 限制管理端/敏感接口仅私网访问)
@@ -164,7 +166,7 @@ http:
     # 模式: Stream 模式 (内存缓存决策库，亚毫秒判定) + AppSec 实时 WAF 深度 Payload 检查
     # 解耦设计: 默认 enabled 与 crowdsecAppsecEnabled 设为 false，Traefik 启动即载入中间件
     #          但完全绕过检测且不向 CrowdSec 发起连接（0 报错与 0 性能损耗）。
-    #          当在 gateways/docker-compose.yml 中引入 crowdsec 服务后，将下方两项开关改为 true 即可。
+    #          当在 crowdsec/docker-compose.yml 启动 crowdsec 服务后，将下方两项开关改为 true 即可。
     # --------------------------------------------------------------------------
     crowdsec-bouncer:
       plugin:
@@ -185,7 +187,7 @@ http:
             - "192.168.0.0/16"
 
     # --------------------------------------------------------------------------
-    # 14. 标准中间件链路组合 (Chains - 对应 Caddy proxy-app 模式)
+    # 14. 标准中间件链路组合 (Chains - 标准可复用安全链路)
     # 官方文档: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/chain/
     # --------------------------------------------------------------------------
     # 基础安全链路 (基础 Web 服务首选: 安全响应头 + 内容压缩 + 防 502 重试)
@@ -196,7 +198,7 @@ http:
           - compress
           - retry-service
 
-    # 认证防护链路 (对应 Caddy 的 proxy-app-auth: 基础安全 + Authelia 单点登录)
+    # 认证防护链路 (基础安全 + Authelia 单点登录双重防护)
     chain-auth:
       chain:
         middlewares:

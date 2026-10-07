@@ -20,7 +20,7 @@ services:
       # 仓库自包含配置只读挂载 (防篡改且无需依赖外部全局绝对路径)
       - ./config.yml:/etc/otelcol-contrib/config.yaml:ro
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:13133/"]
+      test: ["CMD", "/otelcol-contrib", "validate", "--config=/etc/otelcol-contrib/config.yaml"]
       interval: 10s
       timeout: 3s
       retries: 3

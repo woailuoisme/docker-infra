@@ -12,7 +12,7 @@ include:
 
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
   - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
-  - pgbackups/docker-compose.yml           # PostgreSQL 自动化定时备份与多层轮转归档
+  # - pgbackups/docker-compose.yml           # PostgreSQL 自动化定时备份与多层轮转归档
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
 

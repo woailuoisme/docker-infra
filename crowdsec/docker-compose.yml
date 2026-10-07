@@ -8,19 +8,17 @@ services:
       - TZ=${TIMEZONE:-Asia/Shanghai}
       # 启用 SQLite WAL (Write-Ahead Logging) 模式，提升并发读写吞吐，杜绝数据库锁冲突
       - USE_WAL=true
-      # 声明式自动注册双网关 Bouncer 认证密钥 (免手动运行 cscli)
+      # 声明式自动注册 Traefik Bouncer 认证密钥 (免手动运行 cscli)
       - BOUNCER_KEY_traefik=${CROWDSEC_BOUNCER_KEY_TRAEFIK:-${CROWDSEC_BOUNCER_KEY:-crowdsec-traefik-bouncer-dev-secret-key-32ch}}
-      - BOUNCER_KEY_caddy=${CROWDSEC_BOUNCER_KEY_CADDY:-crowdsec-caddy-bouncer-dev-secret-key-32ch}
     volumes:
       # 持久化数据与运行时配置
       - ${DATA_PATH:-./data/}crowdsec/data:/var/lib/crowdsec/data
       - ${DATA_PATH:-./data/}crowdsec/config:/etc/crowdsec
       # 业务定制配置精确只读挂载 (Git 源码真理，防持久化卷遮蔽)
       - ./config/acquis.d:/etc/crowdsec/acquis.d:ro
-      - ./config/parsers:/etc/crowdsec/parsers:ro
-      # 挂载双网关访问日志 (只读采集)
+      - ./config/parsers/s02-enrich/00-custom-whitelists.yaml:/etc/crowdsec/parsers/s02-enrich/00-custom-whitelists.yaml:ro
+      # 挂载 Traefik 网关访问日志 (只读采集)
       - ${LOG_PATH:-./logs/}traefik:/var/log/traefik:ro
-      - ${LOG_PATH:-./logs/}caddy:/var/log/caddy:ro
     healthcheck:
       test: ["CMD-SHELL", "cscli lapi status > /dev/null 2>&1 || exit 1"]
       interval: 15s

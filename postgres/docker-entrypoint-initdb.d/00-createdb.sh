@@ -21,14 +21,5 @@ function create_db_if_not_exists() {
 if [ "${POSTGRES_DB:-}" != "lunchbox" ]; then
 	create_db_if_not_exists "lunchbox"
 fi
-create_db_if_not_exists "authelia"
-create_db_if_not_exists "glitchtip"
-create_db_if_not_exists "openobserve"
-create_db_if_not_exists "zitadel"
-create_db_if_not_exists "chatwoot"
-create_db_if_not_exists "casdoor"
-create_db_if_not_exists "infisical"
-create_db_if_not_exists "signoz"
-create_db_if_not_exists "peerdb"
 
 echo "Database administrator tasks completed."

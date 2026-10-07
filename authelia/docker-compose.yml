@@ -20,7 +20,7 @@ services:
       - ./config:/config:ro
       - ${DATA_PATH:-./data/}authelia:/data
     ports:
-      # 默认绑定本地回环 127.0.0.1，外部流量统一通过反向代理网关 (Traefik / Caddy) 接入
+      # 默认绑定本地回环 127.0.0.1，外部流量统一通过反向代理网关 (Traefik) 接入
       - "${AUTHELIA_BIND:-127.0.0.1}:${AUTHELIA_PORT:-9091}:9091"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:9091/api/health"]

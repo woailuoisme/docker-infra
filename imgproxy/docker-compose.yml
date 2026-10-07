@@ -6,7 +6,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      # 默认绑定本地回环 127.0.0.1，统一经反向代理网关 (Traefik / Caddy) 实现边缘缓存与加速
+      # 默认绑定本地回环 127.0.0.1，统一经反向代理网关 (Traefik) 实现边缘缓存与加速
       - "${IMGPROXY_BIND:-127.0.0.1}:${IMGPROXY_PORT:-8088}:8080"
     environment:
       # 签名安全凭证 (HMAC-SHA256 签名计算，生产环境强烈建议在 .env 中覆盖)

@@ -1,48 +1,52 @@
-**/homepage/logs
-/data/
-/backup/
-/.env
-/logs/
+# ==============================================================================
+# Docker Infrastructure Git 忽略规则 (.gitignore)
+# ==============================================================================
+
+# --- 1. 环境配置与敏感凭据 (Environment & Secrets) ---
 .env
-.env.local
-.env.product
-/iam/authelia/db.sqlite3
+.env.*
+!.env.example
+*.ini
+*.pem
+*.key
+*.crt
 
-**/3xui/db/**
-**/sui/db/**
-**/sui/cert/**
-.zed
-.codebuddy
-.qoder
-.idea
-# .vscode
-.DS_Store
-.claude
-.agents
-.agent
-**/.DS_Store
-
-cloudflare.ini
-aliyun.ini
-registry.ini
-./scripts/registry.ini
-
-./certbot/conf/aliyun.ini
-./certbot/conf/cloudflare.ini
-
-certbot/conf/renewal/
-ssh/
-iam/authelia/config/db.sqlite3
-# OpenBao 初始化凭据（含 unseal key 与 root token）
-iam/open-bao/.keys.json
-# OpenBao 应用侧 AppRole 凭据（role_id / secret_id）
-iam/open-bao/.approle-credentials.txt
-
-**/pgbouncer/userlist.txt
-.kiro
-/scripts/setup-github-secrets.sh
+# 容器认证私钥与凭据
 **/mosquitto/config/passwd
+**/traefik/acme/*.json
+acme.json
 
-**/simulators/nodejs/node_modules
-.agents/skills
-devtools/argocd/kube/config
+# --- 2. 宿主机持久化数据与运行时日志 (Data & Logs) ---
+/data/
+data/
+/logs/
+logs/
+/backup/
+backup/
+*.dump
+*.sql.gz
+*.backup
+*.sqlite3
+*.db
+
+# --- 3. 编辑器与 IDE 配置 (IDEs & System) ---
+.DS_Store
+**/.DS_Store
+.idea/
+.zed/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# AI 编码助手工作区配置
+.claude/
+.agents/
+.agent/
+.codebuddy/
+.qoder/
+.kiro/
+
+# --- 4. 临时文件与静态检查缓存 (Caches & Temps) ---
+.rumdl_cache/
+*.tmp
+*.log

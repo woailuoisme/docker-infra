@@ -1,30 +1,20 @@
 [tools]
-# --- 构建 & 任务 ---
-just = "latest"          # 任务运行器，Makefile 替代品
+# --- 统一任务运行器与版本控制门禁 ---
+just = "latest"          # 统一运维任务与生命周期运行器
+lefthook = "latest"      # Git 提交流程质量门禁
 
-# --- 代码质量 ---
+# --- 代码质量与静态分析 (CI & Pre-commit) ---
 shellcheck = "latest"    # Shell 脚本静态分析
 shfmt = "latest"         # Shell 脚本格式化
-hadolint = "latest"      # Dockerfile lint
-actionlint = "latest"    # GitHub Actions workflow lint
-lefthook = "latest"      # Git hooks 管理
+hadolint = "latest"      # Dockerfile 语法与规范检测
+actionlint = "latest"    # GitHub Actions 工作流语法分析
+rumdl = "latest"         # Markdown 规范检测与格式化
 
-# --- 文件搜索 ---
-fd = "latest"            # 快速文件查找，find 替代品
-fzf = "latest"           # 交互式模糊搜索
-ripgrep = "latest"       # 快速文本搜索，grep 替代品
-bat = "latest"           # 带语法高亮的文件查看，cat 替代品
+# --- 容器与镜像工程化工具 ---
+lazydocker = "latest"    # 终端 Docker 交互式管理面板
+dive = "latest"          # Docker 镜像分层与体积深度分析工具
+trivy = "latest"         # 容器镜像、Dockerfile 与 Compose 安全漏洞/配置风险扫描器
 
-# --- 数据处理 ---
-jq = "latest"            # JSON 命令行处理
-yq = "latest"            # YAML/JSON/TOML 命令行处理
-
-# --- 网络调试 ---
-xh = "latest"            # 现代 HTTP 客户端，curl 替代品
-
-# --- Kubernetes ---
-kubectl = "latest"       # K8s 命令行工具
-helm = "latest"          # K8s 包管理器
-k9s = "latest"           # 终端 K8s 交互 UI
-kubectx = "latest"       # 快速切换 cluster / namespace
-stern = "latest"         # 多 pod 日志聚合
+# --- 结构化数据解析与自动化辅助 ---
+jq = "latest"            # JSON 命令行处理器 (docker inspect / API 响应解析)
+yq = "latest"            # YAML/TOML 命令行处理器 (Compose 编排文件处理)

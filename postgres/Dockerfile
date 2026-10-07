@@ -24,10 +24,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 定义扩展版本参数（Debian 13 / trixie 对应 PGDG 最新构建）
 # 注：pgvector 升级至 0.8.7 修复了 IVFFlat 缓冲区溢出漏洞 (CVE-2026-103484)
 ARG TIMESCALEDB_VERSION=2.30.2+dfsg-1.pgdg13+1
-ARG PGCRON_VERSION=1.6.8-1.pgdg13+1
+ARG PGCRON_VERSION=1.6.8-1.pgdg13+2
 ARG POSTGIS_VERSION=3.6.4+dfsg-2.pgdg13+1
 ARG PGVECTOR_VERSION=0.8.7-1.pgdg13+1
-ARG PGREPACK_VERSION=1.5.3-1.pgdg13+1
+ARG PGREPACK_VERSION=1.5.3-1.pgdg13+2
 
 # 安装核心扩展：时序 (TimescaleDB)、地理空间 (PostGIS)、向量 (pgvector)、定时调度 (pg_cron)、在线维护 (pg_repack)
 RUN apt-get update && apt-get install -y --no-install-recommends \

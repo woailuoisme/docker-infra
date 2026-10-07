@@ -21,15 +21,15 @@ space_redirects = true
 indent_style = space
 indent_size = 4
 
-[*.yml]
-indent_style = space
-indent_size = 2
-
-[*.yaml]
+[*.{yml,yaml}]
 indent_style = space
 indent_size = 2
 
 [*.toml]
+indent_style = space
+indent_size = 2
+
+[*.{conf,ini}]
 indent_style = space
 indent_size = 2
 

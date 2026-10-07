@@ -8,15 +8,14 @@
   "files.trimTrailingWhitespace": true,
 
   // ==========================================
-  // 文件关联（解决 Helm 模板与 YAML 语法冲突）
+  // 文件关联
   // ==========================================
   "files.associations": {
-    "**/apps/**/templates/**/*.yaml": "helm-template",
-    "**/apps/**/templates/**/*.tpl": "helm-template",
-    "**/helm/**/templates/**/*.yaml": "helm-template",
-    "**/helm/**/templates/**/*.tpl": "helm-template",
     "justfile": "just",
-    ".shellcheckrc": "ini"
+    ".shellcheckrc": "ini",
+    "*.conf": "properties",
+    ".env*": "dotenv",
+    "acl": "properties"
   },
 
   // ==========================================
@@ -32,7 +31,7 @@
   },
 
   // ==========================================
-  // YAML 与 Kubernetes 校验配置
+  // YAML 编排与工作流校验配置
   // ==========================================
   "yaml.validate": true,
   "yaml.format.enable": true,
@@ -40,16 +39,12 @@
     "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": [
       "docker-compose.yml",
       "docker-compose.*.yml",
-      "docker/**/docker-compose.yml",
-      "docker/**/docker-compose.*.yml"
+      "**/docker-compose.yml",
+      "**/docker-compose.*.yml"
     ],
     "https://json.schemastore.org/github-workflow.json": [
       ".github/workflows/*.yml",
       ".github/workflows/*.yaml"
-    ],
-    "kubernetes": [
-      "argocd/**/*.yaml",
-      "argocd/**/*.yml"
     ]
   },
 
@@ -79,11 +74,6 @@
     "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.tabSize": 2,
     "editor.insertSpaces": true
-  },
-  "[helm-template]": {
-    "editor.tabSize": 2,
-    "editor.insertSpaces": true,
-    "editor.formatOnSave": false
   },
   "[shellscript]": {
     "editor.defaultFormatter": "mkhl.shfmt",

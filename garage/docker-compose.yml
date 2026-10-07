@@ -3,11 +3,11 @@ services:
     image: dxflrs/garage:${GARAGE_VERSION:-v2.4.1}
     container_name: garage
     restart: always
-    command: server --single-node --default-bucket
+    command: /garage server
     security_opt:
       - no-new-privileges:true
     ports:
-      # S3 API: 默认绑定 127.0.0.1，公网统一由反向代理 (Traefik / Caddy) 终结 HTTPS 接入
+      # S3 API: 默认绑定 127.0.0.1，公网统一由反向代理网关 (Traefik) 终结 HTTPS 接入
       - "${GARAGE_S3_BIND:-127.0.0.1}:${GARAGE_S3_PORT:-3900}:3900"
       # RPC 端口: 集群内部通信使用，单节点绑定 127.0.0.1 阻断外部扫描
       - "${GARAGE_RPC_BIND:-127.0.0.1}:${GARAGE_RPC_PORT:-3901}:3901"

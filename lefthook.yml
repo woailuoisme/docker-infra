@@ -1,3 +1,7 @@
+# ==============================================================================
+# Lefthook Git 质量门禁配置 (Git Hooks Configuration)
+# ==============================================================================
+
 pre-commit:
   parallel: true
   jobs:
@@ -7,13 +11,6 @@ pre-commit:
         - "**/docker-compose.yml"
         - ".env.example"
       run: just lint-compose
-
-    - name: validate helm & k8s
-      glob:
-        - "apps/**/*"
-        - "platform/**/*"
-        - "bootstrap/**/*"
-      run: just lint-helm && just lint-k8s
 
     - name: hadolint
       glob:
@@ -43,4 +40,3 @@ pre-commit:
         - "**/*.md"
       run: rumdl fmt {staged_files}
       stage_fixed: true
-

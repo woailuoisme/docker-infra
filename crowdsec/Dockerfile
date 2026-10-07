@@ -1,12 +1,11 @@
 FROM crowdsecurity/crowdsec:v1.8.1-slim
 
-# 预置环境并预装 Traefik/Caddy 解析器与防御规则集合 (构建期固化，消除容器冷启动联网下载)
+# 预置环境并预装 Traefik 解析器与防御规则集合 (构建期固化，消除容器冷启动联网下载)
 RUN mkdir -p /etc/crowdsec /var/lib/crowdsec/data && \
     cp -r /staging/etc/crowdsec/* /etc/crowdsec/ && \
     cscli hub update && \
     cscli collections install \
         crowdsecurity/traefik \
-        crowdsecurity/caddy \
         crowdsecurity/http-cve \
         crowdsecurity/whitelist-good-actors \
         crowdsecurity/base-http-scenarios \
