@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# bgin-api 业务服务路由配置 (bgin-api Router & Service)
+# 挂载 chain-basic@file 中间件链路，由应用层基于 CORS_ALLOWED_ORIGINS 自行处理跨域
+# ==============================================================================
+
+http:
+  routers:
+    bgin-api:
+      rule: 'Host(`api.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: bgin-api-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    bgin-api-service:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://bgin-api:3300"

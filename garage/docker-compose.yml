@@ -14,9 +14,7 @@ services:
       # Admin API: 节点管理与监控指标，仅本地回环可达
       - "${GARAGE_ADMIN_BIND:-127.0.0.1}:${GARAGE_ADMIN_PORT:-3903}:3903"
     volumes:
-      # 仓库自包含配置只读挂载 (防篡改且无需依赖外部全局绝对路径)
       - ./garage.toml:/etc/garage.toml:ro
-      # 数据与元数据持久化存储
       - ${DATA_PATH:-./data/}garage:/var/lib/garage
     environment:
       # 密钥凭据: 支持由 .env 动态重写覆盖 garage.toml，保障生产安全与密钥轮换

@@ -1,0 +1,25 @@
+x-app: &app
+  image: ghcr.io/woailuoisme/gin-bun:latest
+  restart: always
+  env_file:
+    - path: .env.production
+  volumes:
+    - ./storage:/app/storage
+  networks:
+    - backend
+
+services:
+  bgin-api:
+    <<: *app
+    container_name: bgin-api
+    command: ["serve"]
+    ports:
+      - "${APP_PORT:-127.0.0.1:3300}:3300"
+
+  bgin-worker:
+    <<: *app
+    container_name: bgin-worker
+    command: ["queue:work"]
+    depends_on:
+      - bgin-api
+

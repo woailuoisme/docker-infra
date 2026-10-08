@@ -14,6 +14,10 @@ init:
     @mkdir -p data logs
     @command -v lefthook >/dev/null 2>&1 && lefthook install || true
 
+# 初始化 Garage S3 存储桶与访问密钥 (default & bgin)
+init-garage:
+    @./garage/scripts/init-buckets.sh
+
 # 签发本地受信通配符证书
 cert domain="test.local":
     @mkdir -p data/ssl/live/{{domain}}
@@ -66,7 +70,7 @@ lint-dockerfile:
     hadolint crowdsec/Dockerfile postgres/Dockerfile dnsmasq/Dockerfile
 
 lint-shell:
-    find postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shellcheck {} +
+    find postgres/docker-entrypoint-initdb.d/ garage/scripts/ -name "*.sh" -exec shellcheck {} +
 
 lint-actions:
     actionlint
@@ -78,7 +82,7 @@ lint-md:
 fmt: fmt-shell fmt-md
 
 fmt-shell:
-    find postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shfmt -w {} +
+    find postgres/docker-entrypoint-initdb.d/ garage/scripts/ -name "*.sh" -exec shfmt -w {} +
 
 fmt-md:
     rumdl fmt

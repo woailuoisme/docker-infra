@@ -31,6 +31,9 @@ include:
   - open-observe/docker-compose.yml        # OpenObserve 极简云原生日志分析与时序指标观测平台
   - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
 
+  # --- 7. 业务应用与微服务 (Applications & Services) ---
+  - app/docker-compose.yml                 # bgin-api 核心业务服务与异步工作流
+
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
 # ------------------------------------------------------------------------------
