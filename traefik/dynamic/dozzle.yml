@@ -1,13 +1,14 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Dozzle 容器流式日志查看器路由配置 (Dozzle Router & Service)
+# 行业标准前缀: logs.{{ env "SITE_ADDRESS" }} (同时兼容保留 containers. 与 dozzle.)
 # 受 Authelia SSO 统一保护 (chain-auth@file)
 # ==============================================================================
 
 http:
   routers:
     dozzle:
-      rule: 'Host(`dozzle.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`logs.{{ env "SITE_ADDRESS" }}`) || Host(`containers.{{ env "SITE_ADDRESS" }}`) || Host(`dozzle.{{ env "SITE_ADDRESS" }}`)'
       entryPoints:
         - websecure
       service: dozzle-service

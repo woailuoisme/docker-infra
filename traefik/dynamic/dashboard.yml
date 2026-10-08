@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Traefik v3 Dashboard 仪表盘路由配置 (Dashboard Router)
+# 行业标准前缀: gateway.{{ env "SITE_ADDRESS" }} (同时兼容保留旧前缀 traefik.{{ env "SITE_ADDRESS" }})
 # 受 Authelia SSO 统一保护 (chain-auth@file)，根路径自动跳转 /dashboard/
 # ==============================================================================
 
@@ -8,7 +9,7 @@ http:
   routers:
     # 根路径重定向至 /dashboard/
     traefik-dashboard-root:
-      rule: 'Host(`traefik.{{ env "SITE_ADDRESS" }}`) && Path(`/`)'
+      rule: '(Host(`gateway.{{ env "SITE_ADDRESS" }}`) || Host(`traefik.{{ env "SITE_ADDRESS" }}`)) && Path(`/`)'
       priority: 100
       entryPoints:
         - websecure
@@ -20,7 +21,7 @@ http:
 
     # 主仪表盘路由 (包含 /dashboard/ 与 /api/*)
     traefik-dashboard:
-      rule: 'Host(`traefik.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`gateway.{{ env "SITE_ADDRESS" }}`) || Host(`traefik.{{ env "SITE_ADDRESS" }}`)'
       priority: 10
       entryPoints:
         - websecure
@@ -35,4 +36,3 @@ http:
         regex: "^https?://([^/]+)/?$"
         replacement: "https://${1}/dashboard/"
         permanent: false
-

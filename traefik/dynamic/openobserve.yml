@@ -1,13 +1,14 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # OpenObserve 云原生可观测性平台路由配置 (OpenObserve Router & Service)
-# 提供日志、时序指标与链路追踪看板，使用基础安全与压缩链路 (chain-basic@file)
+# 行业标准前缀: observe.{{ env "SITE_ADDRESS" }} (统一 APM、Metrics 与 Traces 观测中心)
+# 提供全量时序指标、链路追踪与历史日志看板，使用基础安全与压缩链路 (chain-basic@file)
 # ==============================================================================
 
 http:
   routers:
     openobserve:
-      rule: 'Host(`logs.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`observe.{{ env "SITE_ADDRESS" }}`)'
       entryPoints:
         - websecure
       service: openobserve-service

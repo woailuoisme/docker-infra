@@ -219,3 +219,10 @@ http:
         middlewares:
           - chain-basic
           - ip-allow-internal
+
+    # 实时长连接专用链路 (WebSocket / SSE 首选: 仅保留安全响应头，绕过压缩与重试防握手异常)
+    chain-realtime:
+      chain:
+        middlewares:
+          - security-headers
+

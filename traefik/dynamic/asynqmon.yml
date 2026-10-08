@@ -1,13 +1,14 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Asynqmon 异步任务队列监控面板路由配置 (Asynqmon Router & Service)
+# 行业标准前缀: queue.{{ env "SITE_ADDRESS" }} (同时兼容保留旧前缀 asynq.{{ env "SITE_ADDRESS" }})
 # 受 Authelia SSO 统一保护 (chain-auth@file)
 # ==============================================================================
 
 http:
   routers:
     asynqmon:
-      rule: 'Host(`asynq.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`queue.{{ env "SITE_ADDRESS" }}`) || Host(`asynq.{{ env "SITE_ADDRESS" }}`)'
       entryPoints:
         - websecure
       service: asynqmon-service

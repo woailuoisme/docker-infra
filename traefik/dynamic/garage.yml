@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
 # Garage 分布式 S3 对象存储路由配置 (Garage S3 API & WebUI)
-#   - s3.{{ env "SITE_ADDRESS" }}   : S3 API 标准 REST 接口 (chain-basic@file)
-#   - s3-ui.{{ env "SITE_ADDRESS" }}: WebUI 存储管理控制台 (chain-auth@file / Authelia 保护)
+#   - s3.{{ env "SITE_ADDRESS" }}         : S3 API 标准 REST 接口 (chain-basic@file)
+#   - storage-ui.{{ env "SITE_ADDRESS" }} : WebUI 存储管理控制台 (兼容 s3-ui.，受 Authelia 保护)
 # ==============================================================================
 
 http:
@@ -19,7 +19,7 @@ http:
 
     # --- Garage WebUI 控制台 (受 Authelia SSO 统一保护) ---
     garage-webui:
-      rule: 'Host(`s3-ui.{{ env "SITE_ADDRESS" }}`)'
+      rule: 'Host(`storage-ui.{{ env "SITE_ADDRESS" }}`) || Host(`s3-ui.{{ env "SITE_ADDRESS" }}`)'
       entryPoints:
         - websecure
       service: garage-webui-service
