@@ -31,5 +31,6 @@ create_db_if_not_exists "casdoor"
 create_db_if_not_exists "infisical"
 create_db_if_not_exists "signoz"
 create_db_if_not_exists "peerdb"
+create_db_if_not_exists "umami"
 
 echo "Database administrator tasks completed."

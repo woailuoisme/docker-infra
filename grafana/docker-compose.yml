@@ -1,0 +1,42 @@
+services:
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION:-13.2-slim}
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3311:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.${SITE_ADDRESS:-localhost}
+      # 预装行业推荐插件：InfluxDB 3 FlightSQL、Valkey/Redis 监控与 Apache ECharts 复杂 IoT 图表
+      - GF_INSTALL_PLUGINS=influxdata-flightsql-datasource,redis-datasource,volkovlabs-echarts-panel
+      # 传递机密凭据，供 Provisioning 数据源动态插值使用
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_DATABASE=${INFLUXDB_DATABASE:-iot}
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    volumes:
+      # 遵循仓库数据存储规范，统一持久化至 ${DATA_PATH}
+      - ${DATA_PATH:-./data/}grafana:/var/lib/grafana
+      # 自动化预置数据源与仪表盘目录 (只读挂载)
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      - backend
+      - frontend

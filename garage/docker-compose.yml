@@ -2,7 +2,7 @@ services:
   garage:
     image: dxflrs/garage:${GARAGE_VERSION:-v2.4.1}
     container_name: garage
-    restart: always
+    restart: unless-stopped
     command: /garage server
     security_opt:
       - no-new-privileges:true
@@ -47,7 +47,7 @@ services:
   garage-webui:
     image: khairul169/garage-webui:${GARAGE_WEBUI_VERSION:-1.1.0}
     container_name: garage-webui
-    restart: always
+    restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     ports:

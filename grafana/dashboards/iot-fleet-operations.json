@@ -1,0 +1,535 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "🔍 前往单机深度工况诊断台",
+      "tooltip": "聚焦单台售货机温控、电气与振动深度分析",
+      "type": "link",
+      "url": "/d/iot-device-diagnostics"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "全国在线售货机总数 (Active Fleet)",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT device_no) as active_devices FROM vm_telemetry WHERE $__timeFilter(time)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "机群核心冷链平均仓温 (Avg Freezer Temp)",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": -18 },
+              { "color": "orange", "value": -12 },
+              { "color": "red", "value": -5 }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, AVG((temp_zone_0 + temp_zone_1 + temp_zone_2 + temp_zone_3) / 4.0) as avg_temp FROM vm_telemetry WHERE $__timeFilter(time) GROUP BY time ORDER BY time ASC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "机群柜门安全闭合率 (Door Safety)",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            {
+              "options": {
+                "0": { "color": "red", "index": 0, "text": "存在异常未闭合" },
+                "1": { "color": "green", "index": 1, "text": "全部安全闭合 (Normal)" }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "door_status", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, CASE WHEN MIN(CASE WHEN door_closed THEN 1 ELSE 0 END) = 1 THEN 1 ELSE 0 END as door_status FROM vm_telemetry WHERE $__timeFilter(time) GROUP BY time ORDER BY time DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "区间活跃异常告警总数 (Active Alerts)",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) as event_count FROM vm_events WHERE $__timeFilter(time)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "全国在运售货机集群地理态势中枢 (Fleet Geographic Operations Center)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 5 },
+      "id": 6,
+      "title": "售货机全国地理分布与即时健康态势地图 (Vending Fleet Real-Time Geomap - 点击点位直达单机诊断)",
+      "type": "geomap",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": { "color": "green", "index": 0, "text": "正常运转 (Normal)" },
+                "1": { "color": "orange", "index": 1, "text": "注意预警 (Warning)" },
+                "2": { "color": "red", "index": 2, "text": "严重告警 (Critical)" }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 2 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "device_no" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "🔍 查看该设备单机深度诊断 (${__data.fields.device_no})",
+                    "url": "/d/iot-device-diagnostics?var-device=${__data.fields.device_no}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "basemap": {
+          "config": {
+            "theme": "dark"
+          },
+          "name": "CartoDB Dark",
+          "type": "carto"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": false,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": true,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "health_status",
+                  "fixed": "green"
+                },
+                "opacity": 0.88,
+                "rotation": {
+                  "fixed": 0,
+                  "mode": "mod"
+                },
+                "size": {
+                  "field": "health_status",
+                  "fixed": 12,
+                  "max": 18,
+                  "min": 10
+                },
+                "symbol": {
+                  "fixed": "circle",
+                  "mode": "fixed"
+                },
+                "text": {
+                  "field": "device_no",
+                  "fixed": "",
+                  "mode": "field"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": -16,
+                  "textAlign": "center",
+                  "textBaseline": "bottom"
+                }
+              }
+            },
+            "location": {
+              "latitude": "lat",
+              "longitude": "lng",
+              "mode": "coords"
+            },
+            "name": "售货机在线节点",
+            "tooltip": true,
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 26,
+          "lon": 115,
+          "zoom": 5
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT device_no, MAX(lat) as lat, MAX(lng) as lng, ROUND(AVG(temp_zone_0), 1) as \"温区0仓温 (°C)\", ROUND(AVG(ambient_temp), 1) as \"环境温度 (°C)\", CASE WHEN MIN(CASE WHEN door_closed THEN 1 ELSE 0 END) = 1 THEN '安全闭合' ELSE '未闭合/告警' END as \"柜门状态\", ROUND(MAX(vibration_g), 3) as \"最大振动 (g)\", CASE WHEN AVG(temp_zone_0) > -10.0 OR MIN(CASE WHEN door_closed THEN 1 ELSE 0 END) = 0 OR MAX(vibration_g) > 0.08 THEN 2 WHEN AVG(temp_zone_0) > -16.0 OR MAX(vibration_g) > 0.04 THEN 1 ELSE 0 END as health_status FROM vm_telemetry WHERE $__timeFilter(time) GROUP BY device_no",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "id": 7,
+      "title": "区域机群态势与最新活跃告警流 (Regional Fleets & Active Incidents)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 8, "w": 10, "x": 0, "y": 17 },
+      "id": 8,
+      "title": "三大核心机群规模与平均仓温分布 (Regional Clusters Overview)",
+      "type": "barchart",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "数值",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "lineWidth": 1
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "平均仓温 (°C)" },
+            "properties": [
+              { "id": "unit", "value": "celsius" },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "在线设备数" },
+            "properties": [
+              { "id": "unit", "value": "locale" },
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "barRadius": 0.15,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xField": "region"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT CASE WHEN device_no LIKE 'VM-SH%' THEN '上海机群 (East)' WHEN device_no LIKE 'VM-SZ%' THEN '深圳机群 (South)' WHEN device_no LIKE 'VM-HN%' THEN '海南机群 (Island)' ELSE '其他机群' END as region, COUNT(DISTINCT device_no) as \"在线设备数\", ROUND(AVG(temp_zone_0), 1) as \"平均仓温 (°C)\" FROM vm_telemetry WHERE $__timeFilter(time) GROUP BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 8, "w": 14, "x": 10, "y": 17 },
+      "id": 9,
+      "title": "全国实时告警与异常事件流审计 (Fleet Active Event Stream - 点击设备号下钻)",
+      "type": "table",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "device_no" },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "设备编号 (点击下钻)"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "🔍 前往 ${__data.fields.device_no} 单机工况诊断台",
+                    "url": "/d/iot-device-diagnostics?var-device=${__data.fields.device_no}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "严重等级" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": { "mode": "gradient", "type": "color-background" }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "CRITICAL": { "color": "red", "index": 0, "text": "CRITICAL 严重" },
+                      "INFO": { "color": "blue", "index": 2, "text": "INFO 提示" },
+                      "WARNING": { "color": "orange", "index": 1, "text": "WARNING 预警" }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "事件类型" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-text" }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "CHANNEL_JAM": { "color": "orange", "index": 2, "text": "货道卡塞 (CHANNEL_JAM)" },
+                      "COMPRESSOR_CYCLE": { "color": "green", "index": 4, "text": "压缩机周期 (COMPRESSOR_CYCLE)" },
+                      "DEFROST_CYCLE": { "color": "blue", "index": 3, "text": "化霜周期 (DEFROST_CYCLE)" },
+                      "DOOR_OPEN_TIMEOUT": { "color": "red", "index": 1, "text": "柜门超时 (DOOR_OPEN_TIMEOUT)" },
+                      "OVER_TEMP_ALARM": { "color": "red", "index": 0, "text": "冷链超温 (OVER_TEMP_ALARM)" },
+                      "VANDALISM_ALERT": { "color": "purple", "index": 5, "text": "碰撞破坏 (VANDALISM_ALERT)" }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["count"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "time" }]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, device_no, event_type as \"事件类型\", severity as \"严重等级\", description as \"事件详情\" FROM vm_events WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 50",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["iot", "fleet", "operations", "geomap", "vending-machines"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "全国在运售货机集群态势驾驶舱 (Vending Fleet Operations Center)",
+  "uid": "iot-fleet-operations",
+  "version": 1,
+  "weekStart": ""
+}

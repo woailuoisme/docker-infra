@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Grafana 统一可观测性与时序数据分析看板路由配置 (Grafana Router & Service)
+# 访问地址: grafana.{{ env "SITE_ADDRESS" }}
+# 使用基础安全、gzip 与错误重试链路 (chain-basic@file)，支持 Grafana 原生登录认证
+# ==============================================================================
+
+http:
+  routers:
+    grafana:
+      rule: 'Host(`grafana.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: grafana-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    grafana-service:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+        passHostHeader: true

@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Homepage 统一运维与服务导航门户路由配置 (Homepage Router & Service)
+# 行业标准前缀: home.{{ env "SITE_ADDRESS" }} (同时兼容保留 homepage.{{ env "SITE_ADDRESS" }})
+# 受 Authelia SSO 统一保护 (chain-auth@file)
+# ==============================================================================
+
+http:
+  routers:
+    homepage:
+      rule: 'Host(`home.{{ env "SITE_ADDRESS" }}`) || Host(`homepage.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: homepage-service
+      tls: {}
+      middlewares:
+        - chain-auth@file
+
+  services:
+    homepage-service:
+      loadBalancer:
+        servers:
+          - url: "http://homepage:3000"
+        passHostHeader: true

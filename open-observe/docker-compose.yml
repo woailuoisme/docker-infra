@@ -2,7 +2,7 @@ services:
   openobserve:
     image: openobserve/openobserve:${OPENOBSERVE_VERSION:-v1.0.4}
     container_name: openobserve
-    restart: always
+    restart: unless-stopped
     environment:
       # 初始管理员凭证 (来自 .env)
       - ZO_ROOT_USER_EMAIL=${OPENOBSERVE_ROOT_EMAIL}

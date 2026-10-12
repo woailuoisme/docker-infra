@@ -2,7 +2,7 @@ services:
   crowdsec:
     container_name: crowdsec
     image: crowdsecurity/crowdsec:v1.8.1-slim
-    restart: always
+    restart: unless-stopped
     environment:
       - TZ=${TIMEZONE:-Asia/Shanghai}
       # 启用 SQLite WAL (Write-Ahead Logging) 模式，大幅提升并发读写吞吐，杜绝数据库锁冲突

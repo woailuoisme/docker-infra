@@ -2,7 +2,7 @@ services:
   valkey:
     image: valkey/valkey:${VALKEY_VERSION:-9.1-alpine}
     container_name: valkey
-    restart: always
+    restart: unless-stopped
     command:
       - valkey-server
       - /etc/valkey/valkey.conf
@@ -13,6 +13,8 @@ services:
       - TZ=${TIMEZONE:-Asia/Shanghai}
     # 内存双保险：配置层 maxmemory 256mb + 容器层限额 384mb（预留自身数据结构与网络缓冲区开销）
     mem_limit: 384mb
+    ports:
+      - "6379:6379"
     volumes:
       - ./valkey.conf:/etc/valkey/valkey.conf:ro
       - ${DATA_PATH:-./data/}valkey:/data

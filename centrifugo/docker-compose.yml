@@ -2,7 +2,7 @@ services:
   centrifugo:
     image: centrifugo/centrifugo:${CENTRIFUGO_VERSION:-v6.9}
     container_name: centrifugo
-    restart: always
+    restart: unless-stopped
     command: centrifugo -c /centrifugo/config.yaml
     volumes:
       # 仓库自包含配置只读挂载 (防篡改且无需依赖外部全局绝对路径)

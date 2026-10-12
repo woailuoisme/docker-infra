@@ -1,0 +1,28 @@
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:3.4
+    container_name: umami
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/umami
+      - DATABASE_TYPE=postgresql
+      - APP_SECRET=${UMAMI_APP_SECRET}
+      - CLIENT_IP_HEADER=X-Forwarded-For
+      - DISABLE_TELEMETRY=1
+      - DISABLE_UPDATES=1
+      - MCP_ENABLED=1
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/heartbeat || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend

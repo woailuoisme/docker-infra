@@ -9,6 +9,7 @@ include:
   # --- 2. 安全合规与入侵防御 (Security & Compliance) ---
   - crowdsec/docker-compose.yml            # CrowdSec 行为分析、恶意 IP 自动化封禁与 AppSec WAF
   - authelia/docker-compose.yml            # Authelia 2FA / SSO 单点登录与 Web 前置鉴权代理
+  - open-bao/docker-compose.yml            # OpenBao 安全凭据、KV v2 核心机密引擎与 AppRole 访问控制
 
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
   - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
@@ -30,9 +31,23 @@ include:
   - otel-collector/docker-compose.yml      # OpenTelemetry Collector 统一遥测日志/指标/追踪收集与清洗
   - open-observe/docker-compose.yml        # OpenObserve 极简云原生日志分析与时序指标观测平台
   - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
+  - beszel/docker-compose.yml              # Beszel 轻量级现代化服务器与容器硬件指标看板
+  - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
+  - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
+  - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
+  - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
+  - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
 
-  # --- 7. 业务应用与微服务 (Applications & Services) ---
+  # --- 7. 统一导航与管理门户 (Portals & Navigation) ---
+  - homepage/docker-compose.yml            # Homepage 统一运维与服务导航面板
+
+  # --- 8. 业务应用与微服务 (Applications & Services) ---
   - app/docker-compose.yml                 # bgin-api 核心业务服务与异步工作流
+
+  # --- 9. 物联网、时序数据与设备模拟 (IoT & Time-Series Stack) ---
+  - influxdb/docker-compose.yml            # InfluxDB 3 Apache Arrow 列式时序引擎与 Web 控制台
+  - telegraf/docker-compose.yml            # Telegraf 统一 MQTT IoT 遥测消费与数据清洗通道
+  - simulator/docker-compose.yml           # IoT 冷链智能售货机集群模拟器 (按需启动: profile iot)
 
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)

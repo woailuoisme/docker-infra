@@ -16,13 +16,11 @@ init:
 
 # 初始化 Garage S3 存储桶与访问密钥 (default & bgin)
 init-garage:
-    @./garage/scripts/init-buckets.sh
+    @./scripts/garage/init-buckets.sh
 
 # 签发本地受信通配符证书
 cert domain="test.local":
-    @mkdir -p data/ssl/live/{{domain}}
-    mkcert -install
-    mkcert -cert-file data/ssl/live/{{domain}}/fullchain.pem -key-file data/ssl/live/{{domain}}/privkey.pem "{{domain}}" "*.{{domain}}" "*.s3.{{domain}}"
+    @./scripts/certs/generate.sh "{{domain}}"
 
 # 启动服务
 up service="":
@@ -67,10 +65,10 @@ lint-compose:
     {{compose}} config --quiet
 
 lint-dockerfile:
-    hadolint crowdsec/Dockerfile postgres/Dockerfile dnsmasq/Dockerfile
+    hadolint postgres/Dockerfile dnsmasq/Dockerfile simulator/Dockerfile
 
 lint-shell:
-    find postgres/docker-entrypoint-initdb.d/ garage/scripts/ -name "*.sh" -exec shellcheck {} +
+    find scripts/ postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shellcheck {} +
 
 lint-actions:
     actionlint
@@ -82,7 +80,60 @@ lint-md:
 fmt: fmt-shell fmt-md
 
 fmt-shell:
-    find postgres/docker-entrypoint-initdb.d/ garage/scripts/ -name "*.sh" -exec shfmt -w {} +
+    find scripts/ postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shfmt -w {} +
 
 fmt-md:
     rumdl fmt
+
+# --- OpenBao 密钥与安全管理 ---
+# 初始化 OpenBao 集群并导出解封密钥至 open-bao/.keys.json
+bao-init:
+    @./scripts/openbao/init.sh
+
+# 读取本地密钥解封 OpenBao 容器
+bao-unseal:
+    @./scripts/openbao/unseal.sh
+
+# 查看 OpenBao 容器运行与解封状态
+bao-status:
+    @docker exec openbao bao status
+
+# 容器内免密直通执行 bao CLI 命令 (自动注入 Root Token)
+bao-cli +args:
+    @./scripts/openbao/cli.sh {{args}}
+
+# 批量导入 .env 敏感变量至 OpenBao KV 密钥引擎
+bao-import-env:
+    @./scripts/openbao/import-env.sh
+
+# --- IoT 物联网与时序数据栈 (IoT & Time-Series Stack) ---
+# 初始化 InfluxDB 3 时序数据库与 Token 校验
+init-iot:
+    @./scripts/iot/init-influx.sh
+
+# 启动 IoT 全栈服务 (Mosquitto + InfluxDB + Telegraf + Simulator)
+iot-up:
+    {{compose}} --profile iot up -d mosquitto influxdb influxdb-ui telegraf simulator
+    @just init-iot
+
+# 停止 IoT 服务组件
+iot-down flags="":
+    {{compose}} --profile iot stop mosquitto influxdb influxdb-ui telegraf simulator {{flags}}
+
+# 查看 IoT 容器运行与健康状态
+iot-status:
+    {{compose}} --profile iot ps mosquitto influxdb influxdb-ui telegraf simulator
+
+# 跟踪 IoT 模拟器集群遥测日志
+iot-sim-logs tail="100":
+    {{compose}} logs -f --tail={{tail}} simulator
+
+# 跟踪 Telegraf 消费与入库日志
+iot-telegraf-logs tail="100":
+    {{compose}} logs -f --tail={{tail}} telegraf
+
+# 验证 IoT 完整链路连通性与 InfluxDB 数据入库状态
+iot-test:
+    @./scripts/iot/test-pipeline.sh
+
+

@@ -2,7 +2,7 @@ services:
   meilisearch:
     image: getmeili/meilisearch:${MEILI_VERSION:-v1.54}
     container_name: meilisearch
-    restart: always
+    restart: unless-stopped
     command: meilisearch --config-file-path /meili_config/config.toml
     environment:
       - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}

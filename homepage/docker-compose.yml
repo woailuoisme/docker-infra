@@ -1,0 +1,47 @@
+# ==============================================================================
+# Homepage - 现代化高颜值统一服务导航与运维看板 (Application Dashboard)
+# ==============================================================================
+# 【核心功能与作用】
+# 1. 统一导航面板：集成集群内所有基础设施、监控面板与微服务状态卡片。
+# 2. 深度容器感知：只读挂载 Docker Socket，实时读取容器健康状态、CPU 与内存利用率。
+# 3. 丰富小组件：无缝整合 Traefik、OpenObserve、Postgres、Meilisearch 等统计组件。
+# 4. 安全访问：通过 Traefik 反向代理 (home.${SITE_ADDRESS}) 且由 Authelia SSO 统一保护。
+# ==============================================================================
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_VERSION:-v2.4}
+    container_name: homepage
+    restart: unless-stopped
+    environment:
+      - PUID=${HOMEPAGE_PUID:-0}
+      - PGID=${HOMEPAGE_PGID:-0}
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - HOMEPAGE_ALLOWED_HOSTS=home.${SITE_ADDRESS},homepage.${SITE_ADDRESS},homepage,homepage:3000,localhost,localhost:33000,127.0.0.1,127.0.0.1:33000,*
+      - HOMEPAGE_VAR_SITE_ADDRESS=${SITE_ADDRESS}
+      - HOMEPAGE_VAR_DOMAIN=${SITE_ADDRESS}
+      - LOG_TARGETS=stdout
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      # 默认绑定本地回环 127.0.0.1，外部访问统一通过 Traefik 网关与 Authelia SSO 认证
+      - "${HOMEPAGE_BIND:-127.0.0.1}:${HOMEPAGE_PORT:-33000}:3000"
+    volumes:
+      - ./config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:3000 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 64M
+    networks:
+      - frontend
+      - backend

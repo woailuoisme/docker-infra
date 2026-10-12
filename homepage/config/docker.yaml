@@ -1,0 +1,6 @@
+---
+# Homepage Docker 配置
+# 文档: https://gethomepage.dev/configs/docker/
+
+my-docker:
+  socket: /var/run/docker.sock

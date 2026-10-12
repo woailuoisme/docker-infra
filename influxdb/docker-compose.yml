@@ -1,0 +1,87 @@
+services:
+  influxdb-init:
+    image: influxdb:3.11-core
+    container_name: influxdb-init
+    restart: "no"
+    environment:
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+    volumes:
+      - ${DATA_PATH:-./data/}influxdb/data:/var/lib/influxdb3/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        cat <<EOF > /var/lib/influxdb3/data/admin-token.json
+        {
+          "token": "$${INFLUXDB_TOKEN}",
+          "name": "_admin"
+        }
+        EOF
+        chmod 600 /var/lib/influxdb3/data/admin-token.json
+    networks:
+      - backend
+
+  influxdb:
+    image: influxdb:3.11-core
+    container_name: influxdb
+    restart: unless-stopped
+    depends_on:
+      influxdb-init:
+        condition: service_completed_successfully
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --admin-token-file=/var/lib/influxdb3/data/admin-token.json
+      - --disable-authz=health,ping,metrics
+      - --async-trigger-concurrency-limit=8
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - INFLUXDB3_LOG_FILTER=info
+    volumes:
+      - ${DATA_PATH:-./data/}influxdb/data:/var/lib/influxdb3/data
+    ports:
+      - "${INFLUXDB_PORT:-8181}:8181"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8181/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      - backend
+
+  influxdb-ui:
+    image: influxdata/influxdb3-ui:1.11.0
+    container_name: influxdb-ui
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - DEFAULT_INFLUX_SERVER=http://influxdb:8181
+      - DEFAULT_SERVER_NAME=Local-InfluxDB3
+      - DEFAULT_API_TOKEN=${INFLUXDB_TOKEN}
+      - DEFAULT_INFLUX_DATABASE=${INFLUXDB_DATABASE:-iot}
+      - UI_MODE=admin
+    volumes:
+      - ${DATA_PATH:-./data/}influxdb/ui:/db:rw
+    ports:
+      # Web Explorer 控制台端口
+      - "${INFLUXDB_UI_PORT:-8810}:8080"
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      - frontend
+      - backend
+

@@ -1,0 +1,162 @@
+# ==============================================================================
+# Gatus Configuration (服务健康监控与状态页配置)
+# 文档参考: https://gatus.io/docs
+# ==============================================================================
+
+# Web 服务设置
+web:
+  port: 8080
+
+# 界面展示信息定制
+ui:
+  title: "基础设施服务状态 | Cloud-Native Status"
+  description: "DevOps 云原生微服务与基础设施实时健康监控看板"
+  header: "基础设施运行状态看板"
+  default-sort: "group"
+
+# 持久化存储配置：使用 SQLite 持久化历史检查状态至 /data 目录
+storage:
+  type: sqlite
+  path: /data/data.db
+
+# 暴露 Prometheus 抓取指标 (/metrics)
+metrics: true
+
+# 服务健康监测端点列表
+endpoints:
+  # --- 网络网关与反向代理 (Gateways) ---
+  - name: Traefik Ingress Gateway
+    group: Gateways
+    url: "tcp://traefik:80"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  # --- 安全与认证 (Security) ---
+  - name: Authelia SSO
+    group: Security
+    url: "http://authelia:9091/api/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: CrowdSec Engine
+    group: Security
+    url: "tcp://crowdsec:8080"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  # --- 可观测性与运维 (Observability) ---
+  - name: OpenObserve
+    group: Observability
+    url: "http://openobserve:5080/healthz"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Dozzle Logs
+    group: Observability
+    url: "http://dozzle:8080/healthcheck"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Beszel Hub
+    group: Observability
+    url: "http://beszel:8090/api/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Homepage Dashboard
+    group: Observability
+    url: "http://homepage:3000"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Grafana Dashboard
+    group: Observability
+    url: "http://grafana:3000/api/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  # --- 核心数据库与存储 (Databases & Storage) ---
+  - name: PostgreSQL
+    group: Databases
+    url: "tcp://postgres:5432"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Valkey Cache
+    group: Databases
+    url: "tcp://valkey:6379"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Garage S3 Storage
+    group: Databases
+    url: "tcp://garage:3900"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: InfluxDB 3
+    group: Databases
+    url: "http://influxdb:8181/ping"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+
+  # --- 实时通信与任务调度 (Messaging & Workflows) ---
+  - name: Centrifugo Realtime
+    group: Messaging
+    url: "http://centrifugo:8000/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Mosquitto MQTT
+    group: Messaging
+    url: "tcp://mosquitto:1883"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Temporal Workflow
+    group: Messaging
+    url: "tcp://temporal:7233"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Asynqmon Web
+    group: Messaging
+    url: "http://asynqmon:8080"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  # --- 全文检索与渲染 (Search & Media) ---
+  - name: Meilisearch
+    group: Search
+    url: "http://meilisearch:7700/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  # --- 核心网络与外部解析 (Network) ---
+  - name: Core DNS (Cloudflare)
+    group: Network
+    url: "1.1.1.1"
+    dns:
+      query-name: "cloudflare.com"
+      query-type: "A"
+    interval: 60s
+    conditions:
+      - "[DNS_RCODE] == NOERROR"

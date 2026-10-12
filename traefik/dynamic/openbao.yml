@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# OpenBao 安全凭据与密钥管理控制台路由配置 (OpenBao Router & Service)
+# 行业标准极简前缀: bao.{{ env "SITE_ADDRESS" }} (同时兼容保留 openbao.)
+# 挂载基础安全链路 (chain-basic@file)，由 OpenBao 原生 Token/AppRole 强鉴权独立保护
+# ==============================================================================
+
+http:
+  routers:
+    openbao:
+      rule: 'Host(`bao.{{ env "SITE_ADDRESS" }}`) || Host(`openbao.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: openbao-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    openbao-service:
+      loadBalancer:
+        servers:
+          - url: "http://openbao:8200"
+        passHostHeader: true

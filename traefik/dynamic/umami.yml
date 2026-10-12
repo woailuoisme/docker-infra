@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Umami 现代化轻量网站分析统计平台路由配置 (Umami Analytics Router & Service)
+# 行业标准主域名: analytics.{{ env "SITE_ADDRESS" }} (同时兼容别名 umami.{{ env "SITE_ADDRESS" }})
+# 挂载基础安全与压缩链路 (chain-basic@file)，由 Umami 原生用户体系独立鉴权
+# ==============================================================================
+
+http:
+  routers:
+    umami:
+      rule: 'Host(`analytics.{{ env "SITE_ADDRESS" }}`) || Host(`umami.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: umami-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    umami-service:
+      loadBalancer:
+        servers:
+          - url: "http://umami:3000"
+        passHostHeader: true

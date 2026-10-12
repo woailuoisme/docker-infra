@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=none
+# ==============================================================================
+# Homepage 服务目录与导航卡片配置
+# 使用环境变量格式: {{HOMEPAGE_VAR_SITE_ADDRESS}}
+# ==============================================================================
+
+
+- 网关与安全:
+    - Traefik:
+        icon: traefik
+        href: https://gateway.{{HOMEPAGE_VAR_SITE_ADDRESS}}/dashboard/
+        description: Traefik v3 云原生边缘网关
+        server: my-docker
+        container: traefik
+
+    - Authelia:
+        icon: authelia
+        href: https://auth.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: SSO 单点登录与 2FA 认证门户
+        server: my-docker
+        container: authelia
+
+    - CrowdSec:
+        icon: crowdsec
+        description: 行为分析与入侵防御 WAF 引擎
+        server: my-docker
+        container: crowdsec
+
+- 统一观测与运维:
+    - Homepage:
+        icon: homepage
+        href: https://home.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 统一运维服务导航面板
+        server: my-docker
+        container: homepage
+
+    - Gatus:
+        icon: gatus
+        href: https://status.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 自动化服务健康与状态监控
+        server: my-docker
+        container: gatus
+        widget:
+          type: gatus
+          url: http://gatus:8080
+
+    - Beszel:
+        icon: beszel
+        href: https://beszel.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 服务器硬件与容器指标监控
+        server: my-docker
+        container: beszel
+
+    - Dozzle:
+        icon: dozzle
+        href: https://logs.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 容器日志实时流式查看器
+        server: my-docker
+        container: dozzle
+
+    - OpenObserve:
+        icon: sh-openobserve
+        href: https://observe.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 云原生日志、指标与链路追踪平台
+        server: my-docker
+        container: openobserve
+
+    - Grafana:
+        icon: grafana
+        href: https://grafana.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 统一时序数据指标监控与分析看板
+        server: my-docker
+        container: grafana
+
+    - OTel Collector:
+        icon: si-opentelemetry
+        description: OpenTelemetry 遥测数据采集管道
+        server: my-docker
+        container: otel-collector
+
+- 存储与数据库:
+    - PostgreSQL:
+        icon: postgresql
+        description: PostgreSQL 18 + TimescaleDB 核心数据库
+        server: my-docker
+        container: postgres
+
+    - Valkey:
+        icon: redis
+        description: Valkey 8.0 高性能内存缓存与分布式锁
+        server: my-docker
+        container: valkey
+
+    - Garage S3:
+        icon: garage
+        href: https://storage-ui.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 分布式轻量 S3 对象存储控制台
+        server: my-docker
+        container: garage
+
+    - InfluxDB 3:
+        icon: influxdb
+        href: https://influx.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: InfluxDB 3 Apache Arrow 时序数据库控制台
+        server: my-docker
+        container: influxdb-ui
+
+- 通信与工作流:
+    - Centrifugo:
+        icon: mdi-broadcast
+        href: https://realtime.{{HOMEPAGE_VAR_SITE_ADDRESS}}/admin
+        description: 实时 WebSocket / SSE 广播引擎
+        server: my-docker
+        container: centrifugo
+
+    - Mosquitto:
+        icon: sh-mosquitto
+        description: MQTT 物联网消息 Broker
+        server: my-docker
+        container: mosquitto
+
+    - Telegraf:
+        icon: telegraf
+        description: IoT 遥测指标收集与转换 Agent
+        server: my-docker
+        container: telegraf
+
+
+    - Temporal:
+        icon: si-temporal
+        href: https://workflow.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 分布式持久化工作流调度引擎
+        server: my-docker
+        container: temporal
+
+    - Asynqmon:
+        icon: mdi-tray-full
+        href: https://queue.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: Asynq 异步任务队列 Web 监控看板
+        server: my-docker
+        container: asynqmon
+
+- 检索与处理:
+    - Meilisearch:
+        icon: meilisearch
+        href: https://search.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 高性能轻量全文搜索引擎
+        server: my-docker
+        container: meilisearch
+
+    - imgproxy:
+        icon: mdi-image-auto-adjust
+        href: https://img.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 安全动态图片缩放与裁剪渲染
+        server: my-docker
+        container: imgproxy
+
+- 业务服务:
+    - bgin-api:
+        icon: golang
+        href: https://api.{{HOMEPAGE_VAR_SITE_ADDRESS}}
+        description: 核心业务 REST API 服务
+        server: my-docker
+        container: bgin-api

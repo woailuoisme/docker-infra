@@ -3,7 +3,7 @@ services:
     build:
       context: .
     container_name: dns
-    restart: always
+    restart: unless-stopped
     ports:
       - "5354:53/udp"
       - "5354:53/tcp"

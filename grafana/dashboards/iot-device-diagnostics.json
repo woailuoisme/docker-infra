@@ -1,0 +1,674 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "arrow-left",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "⬅ 返回全国在运售货机集群态势大屏",
+      "tooltip": "返回宏观全国地理态势中枢大屏",
+      "type": "link",
+      "url": "/d/iot-fleet-operations"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "核心冷链与物理安全概况",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": -18 },
+              { "color": "orange", "value": -12 },
+              { "color": "red", "value": -5 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "门锁闭合状态" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": { "color": "red", "index": 0, "text": "门未闭合/告警" },
+                      "1": { "color": "green", "index": 1, "text": "安全闭合" }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "即时振动 (g)" },
+            "properties": [
+              { "id": "unit", "value": "accG" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "orange", "value": 0.04 },
+                    { "color": "red", "value": 0.08 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "温区0仓温 (°C)" },
+            "properties": [
+              { "id": "unit", "value": "celsius" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(temp_zone_0, 1) as \"温区0仓温 (°C)\", CASE WHEN door_closed THEN 1 ELSE 0 END as \"门锁闭合状态\", ROUND(vibration_g, 3) as \"即时振动 (g)\" FROM vm_telemetry WHERE device_no = '$device' ORDER BY time DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "title": "供电电气实时工况指标",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "供电电压 (V)" },
+            "properties": [
+              { "id": "unit", "value": "volt" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red", "value": null },
+                    { "color": "green", "value": 200 },
+                    { "color": "red", "value": 245 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "工作电流 (A)" },
+            "properties": [
+              { "id": "unit", "value": "amp" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "orange", "value": 3.0 },
+                    { "color": "red", "value": 5.0 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "瞬时功率 (W)" },
+            "properties": [
+              { "id": "unit", "value": "watt" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(voltage, 1) as \"供电电压 (V)\", ROUND(current, 2) as \"工作电流 (A)\", ROUND(voltage * current, 1) as \"瞬时功率 (W)\" FROM vm_telemetry WHERE device_no = '$device' ORDER BY time DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 0 },
+      "id": 3,
+      "title": "现场设备物理网点地理微定位 (Site Mini-Geomap: $device)",
+      "type": "geomap",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "basemap": {
+          "config": { "theme": "dark" },
+          "name": "CartoDB Dark",
+          "type": "carto"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": false,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": true,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": false,
+              "style": {
+                "color": { "fixed": "green" },
+                "opacity": 0.9,
+                "rotation": { "fixed": 0, "mode": "mod" },
+                "size": { "fixed": 16, "max": 20, "min": 10 },
+                "symbol": { "fixed": "circle", "mode": "fixed" },
+                "text": { "field": "device_no", "fixed": "", "mode": "field" },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": -16,
+                  "textAlign": "center",
+                  "textBaseline": "bottom"
+                }
+              }
+            },
+            "location": {
+              "latitude": "lat",
+              "longitude": "lng",
+              "mode": "coords"
+            },
+            "name": "当前单机位置",
+            "tooltip": true,
+            "type": "markers"
+          }
+        ],
+        "tooltip": { "mode": "details" },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 26,
+          "lon": 115,
+          "zoom": 6
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT device_no, MAX(lat) as lat, MAX(lng) as lng FROM vm_telemetry WHERE device_no = '$device' GROUP BY device_no",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 10,
+      "title": "冷链多温区实时动态监控 (Cold Chain Temperature Dynamics)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "仓温 (°C)",
+            "axisPlacement": "left",
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": -18 },
+              { "color": "red", "value": -10 }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "ambient_temp" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "dash": [8, 8], "fill": "dash" } },
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "displayName", "value": "环境气温 (Ambient Temp)" },
+              { "id": "custom.lineWidth", "value": 1.5 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "temp_zone_0" },
+            "properties": [{ "id": "displayName", "value": "温区 0 (深冷 -18°C)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "temp_zone_1" },
+            "properties": [{ "id": "displayName", "value": "温区 1 (冷冻 -15°C)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "temp_zone_2" },
+            "properties": [{ "id": "displayName", "value": "温区 2 (冷冻 -15°C)" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "temp_zone_3" },
+            "properties": [{ "id": "displayName", "value": "温区 3 (深冷 -18°C)" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 7 },
+      "id": 11,
+      "options": {
+        "legend": { "calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, temp_zone_0, temp_zone_1, temp_zone_2, temp_zone_3, ambient_temp FROM vm_telemetry WHERE $__timeFilter(time) AND device_no = '$device' ORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "4温区仓温走势与外界环境气温对照 (Temperature Curves vs Ambient)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 35,
+          "min": -25,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": -18 },
+              { "color": "orange", "value": -12 },
+              { "color": "red", "value": -5 }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "环境温度" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "orange", "value": 30 },
+                    { "color": "red", "value": 38 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 7 },
+      "id": 12,
+      "options": {
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT temp_zone_0 as \"温区0 (深冷)\", temp_zone_1 as \"温区1 (冷冻)\", temp_zone_2 as \"温区2 (冷冻)\", temp_zone_3 as \"温区3 (深冷)\", ambient_temp as \"环境温度\" FROM vm_telemetry WHERE device_no = '$device' ORDER BY time DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "各温区当前瞬时温度分布梯级 (Current Temp Gradients)",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "id": 20,
+      "title": "电气与机械工况遥测 (Electrical & Mechanical Telemetry)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "电压 (V)",
+            "axisPlacement": "left",
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "current" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "custom.axisLabel", "value": "电流 (A)" },
+              { "id": "unit", "value": "amp" },
+              { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } },
+              { "id": "displayName", "value": "工作电流 (Current)" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "voltage" },
+            "properties": [
+              { "id": "displayName", "value": "供电电压 (Voltage)" },
+              { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 21,
+      "options": {
+        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, voltage, current FROM vm_telemetry WHERE $__timeFilter(time) AND device_no = '$device' ORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "供电电压 (220V) 与负载工作电流 (1~2A) 动态波形",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "加速度 (g)",
+            "axisPlacement": "left",
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "spanNulls": false,
+            "thresholdsStyle": { "mode": "line+area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.04 },
+              { "color": "red", "value": 0.08 }
+            ]
+          },
+          "unit": "accG"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "vibration_g" },
+            "properties": [
+              { "id": "displayName", "value": "机身三轴合成微振动 (Vibration)" }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 22,
+      "options": {
+        "legend": { "calcs": ["max", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, vibration_g FROM vm_telemetry WHERE $__timeFilter(time) AND device_no = '$device' ORDER BY time ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "机身三轴加速度合成微振动监测 (机械颠簸与暴力告警排查)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "id": 30,
+      "title": "本机历史告警与动作日志流 (Device Event Audit)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "严重等级" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": { "mode": "gradient", "type": "color-background" }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "CRITICAL": { "color": "red", "index": 0, "text": "CRITICAL 严重" },
+                      "INFO": { "color": "blue", "index": 2, "text": "INFO 提示" },
+                      "WARNING": { "color": "orange", "index": 1, "text": "WARNING 预警" }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "事件类型" },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-text" }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "CHANNEL_JAM": { "color": "orange", "index": 2, "text": "货道卡塞 (CHANNEL_JAM)" },
+                      "COMPRESSOR_CYCLE": { "color": "green", "index": 4, "text": "压缩机周期 (COMPRESSOR_CYCLE)" },
+                      "DEFROST_CYCLE": { "color": "blue", "index": 3, "text": "化霜周期 (DEFROST_CYCLE)" },
+                      "DOOR_OPEN_TIMEOUT": { "color": "red", "index": 1, "text": "柜门超时 (DOOR_OPEN_TIMEOUT)" },
+                      "OVER_TEMP_ALARM": { "color": "red", "index": 0, "text": "冷链超温 (OVER_TEMP_ALARM)" },
+                      "VANDALISM_ALERT": { "color": "purple", "index": 5, "text": "碰撞破坏 (VANDALISM_ALERT)" }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 25 },
+      "id": 31,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["count"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "time" }]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "InfluxDB3-SQL" },
+          "format": "table",
+          "rawSql": "SELECT time, event_type as \"事件类型\", severity as \"严重等级\", description as \"事件详情\" FROM vm_events WHERE $__timeFilter(time) AND device_no = '$device' ORDER BY time DESC LIMIT 50",
+          "refId": "A"
+        }
+      ],
+      "title": "单机故障排查与动作审计流 (Filtered by $device)",
+      "type": "table"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["iot", "diagnostics", "device", "vending-machines", "hardware"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "VM-SH-001",
+          "value": "VM-SH-001"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "InfluxDB3-SQL"
+        },
+        "definition": "SELECT DISTINCT device_no FROM vm_telemetry ORDER BY device_no ASC",
+        "hide": 0,
+        "includeAll": false,
+        "label": "选择分析目标设备 (Target Machine)",
+        "multi": false,
+        "name": "device",
+        "options": [],
+        "query": "SELECT DISTINCT device_no FROM vm_telemetry ORDER BY device_no ASC",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "售货机单机工况深度诊断台 (Vending Machine Diagnostics Workbench)",
+  "uid": "iot-device-diagnostics",
+  "version": 1,
+  "weekStart": ""
+}

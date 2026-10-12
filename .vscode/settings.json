@@ -47,6 +47,11 @@
       ".github/workflows/*.yaml"
     ]
   },
+  "yaml.disableSchemaDetection": [
+    "**/homepage/config/*.yaml",
+    "**/homepage/config/*.yml"
+  ],
+
 
   // ==========================================
   // Shell 脚本开发体验（ShellCheck + shfmt）

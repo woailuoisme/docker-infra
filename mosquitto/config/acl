@@ -24,6 +24,9 @@ pattern readwrite %u/#
 # 服务端下发控制：device/<username>/command
 pattern readwrite device/%u/#
 
+# IoT 售货机 V1.0 规范命名空间 (v1/vm/{device_no}/...)
+pattern readwrite v1/vm/%u/#
+
 # 基于 Client ID 的物理设备隔离：
 pattern readwrite devices/%c/#
 

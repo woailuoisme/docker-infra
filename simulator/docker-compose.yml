@@ -1,0 +1,25 @@
+services:
+  simulator:
+    profiles:
+      - iot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simulator
+    image: simulator
+    pull_policy: never
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    env_file:
+      - ./.env
+    environment:
+      - MQTT_HOST=mosquitto # 容器内部互联使用服务名，覆盖 .env 中的 localhost
+      - MQTT_PORT=1883
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    depends_on:
+      - mosquitto
+    networks:
+      - backend

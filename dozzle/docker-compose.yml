@@ -2,7 +2,7 @@ services:
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:${DOZZLE_VERSION:-v11}
-    restart: always
+    restart: unless-stopped
     ports:
       # 默认仅绑定本地回环 127.0.0.1，由反向代理统一暴露并受 Authelia / SSO 双重保护
       - "${DOZZLE_BIND:-127.0.0.1}:${DOZZLE_PORT:-8180}:8080"

@@ -3,7 +3,7 @@ services:
     container_name: postgres
     build:
       context: .
-    restart: always
+    restart: unless-stopped
     # 共享内存：预留给 shared_buffers (256MB) 与并行查询/动态共享内存段 (DSM)
     shm_size: 512mb
     environment:

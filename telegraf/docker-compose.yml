@@ -1,0 +1,37 @@
+services:
+  telegraf:
+    image: telegraf:${TELEGRAF_VERSION:-1.40-alpine}
+    container_name: telegraf
+    restart: unless-stopped
+    command: ["--strict-env-handling"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8181
+      - INFLUXDB_DATABASE=${INFLUXDB_DATABASE:-iot}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf.d:/etc/telegraf/telegraf.d:ro
+    ports:
+      - "9080:8080" # 监控与指标端点
+    depends_on:
+      - mosquitto
+      - influxdb
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/metrics > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - backend

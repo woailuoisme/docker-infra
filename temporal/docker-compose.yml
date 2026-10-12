@@ -2,7 +2,7 @@ services:
   temporal:
     image: temporalio/temporal:${TEMPORAL_VERSION:-1.9.1}
     container_name: temporal
-    restart: always
+    restart: unless-stopped
     command:
       - server
       - start-dev

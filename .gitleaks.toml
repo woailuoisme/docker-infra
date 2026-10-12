@@ -1,0 +1,50 @@
+title = "docker-infra gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for docker-infra templates, local secrets, documentation, and dev placeholders"
+paths = [
+  # 环境变量模板与示例文件
+  '''(?i).*\.example$''',
+  '''(?i).*\.example\.ya?ml$''',
+  '''(?i)\.secrets\.env$''',
+
+  # 本地运行时环境变量与密钥凭据 (已在 .gitignore 中，防止直接扫描报警)
+  '''(?i)(^|/)\.env($|\..*)''',
+  '''(?i)open-bao/\.keys\.json$''',
+  '''(?i)open-bao/\.approle-credentials\.txt$''',
+  '''(?i)mosquitto/config/passwd$''',
+  '''(?i).*/acme/.*\.json$''',
+  '''(?i)acme\.json$''',
+  '''(?i).*\.pem$''',
+  '''(?i).*\.key$''',
+  '''(?i).*\.crt$''',
+
+  # 文档与图表说明
+  '''(?i)docs/.*''',
+  '''(?i).*/docs/.*''',
+  '''(?i).*\.md$''',
+
+  # 宿主机运行时持久化数据、日志与备份
+  '''(?i)(^|/)data/.*''',
+  '''(?i)(^|/)logs/.*''',
+  '''(?i)(^|/)backup/.*''',
+
+  # Git 与本地 IDE / AI 助手配置缓存
+  '''(?i)\.git/.*''',
+  '''(?i)\.(claude|agents|agent|codebuddy|qoder|kiro)/.*''',
+
+  # Garage 默认本地开发配置模板 (运行期由环境变量覆盖)
+  '''(?i)garage/garage\.toml$''',
+]
+
+stopwords = [
+  # Garage 预设本地开发通信与监控占位凭据
+  "5368ea7003a35eebcaf25c618fab1c3ad1dbae01b8fc5d1fba4c737e5a955751",
+  "A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ=",
+  "VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4=",
+  # InfluxDB 3 预设本地开发测试 Token
+  "apiv3_XThJgUrFlgd7oBCQywiJ5YZxY7QEA0bqgFIkusRZPmcVfVH4_0rOXSOWs6POUmyb_COkHRpcb7rGLBEXnU_fwg",
+]

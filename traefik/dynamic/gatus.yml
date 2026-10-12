@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Gatus 自动化服务健康与状态监控看板路由配置 (Gatus Router & Service)
+# 行业标准前缀: status.{{ env "SITE_ADDRESS" }} (同时兼容保留 gatus.{{ env "SITE_ADDRESS" }})
+# 公开状态页展示，挂载基础安全与压缩链路 (chain-basic@file)
+# ==============================================================================
+
+http:
+  routers:
+    gatus:
+      rule: 'Host(`status.{{ env "SITE_ADDRESS" }}`) || Host(`gatus.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: gatus-service
+      tls: {}
+      middlewares:
+        - chain-basic@file
+
+  services:
+    gatus-service:
+      loadBalancer:
+        servers:
+          - url: "http://gatus:8080"
+        passHostHeader: true

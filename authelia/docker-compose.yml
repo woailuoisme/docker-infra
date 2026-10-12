@@ -2,7 +2,7 @@ services:
   authelia:
     image: authelia/authelia:${AUTHELIA_VERSION:-4.39}
     container_name: authelia
-    restart: always
+    restart: unless-stopped
     environment:
       - X_AUTHELIA_CONFIG_FILTERS=template
       - TZ=${TIMEZONE:-Asia/Shanghai}

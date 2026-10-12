@@ -15,6 +15,9 @@
 **/mosquitto/config/passwd
 **/traefik/acme/*.json
 acme.json
+open-bao/.keys.json
+open-bao/.approle-credentials.txt
+
 
 # --- 2. 宿主机持久化数据与运行时日志 (Data & Logs) ---
 /data/

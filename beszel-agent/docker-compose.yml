@@ -1,0 +1,36 @@
+# ==============================================================================
+# Beszel Agent - 宿主机硬件与容器指标监控探针 (Host Metrics Agent)
+# ==============================================================================
+# 【使用说明】
+# 1. 访问 Beszel Hub 仪表板 (https://beszel.${SITE_ADDRESS}) 并登录。
+# 2. 点击「Add System」获取专属通用令牌 (TOKEN)。
+# 3. 在 .env 中填入 BESZEL_AGENT_TOKEN，启动本探针即自动完成握手与系统注册。
+# ==============================================================================
+
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:${BESZEL_AGENT_VERSION:-0.21.0}
+    container_name: beszel-agent
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DATA_PATH:-./data/}beszel-agent:/var/lib/beszel-agent
+    environment:
+      - PORT=${BESZEL_AGENT_PORT:-45876}
+      - KEY=${BESZEL_AGENT_KEY:-}
+      - TOKEN=${BESZEL_AGENT_TOKEN:-}
+      - HUB_URL=${BESZEL_HUB_URL:-http://127.0.0.1:8090}
+    healthcheck:
+      test: ["CMD", "/agent", "health"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          memory: 32M

@@ -1,6 +1,6 @@
 x-app: &app
   image: ghcr.io/woailuoisme/gin-bun:latest
-  restart: always
+  restart: unless-stopped
   env_file:
     - path: .env.production
   volumes:

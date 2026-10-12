@@ -1,0 +1,42 @@
+# ==============================================================================
+# Beszel - 轻量级现代化服务器与容器监控看板 (Lightweight Server & Docker Monitor)
+# ==============================================================================
+# 【核心功能与定位】
+# 1. 极简高颜值监控：基于 Go + PocketBase 构建，极速轻量，单服务常驻内存约 20MB。
+# 2. 深度硬件与容器指标：实时监控 CPU、内存、磁盘 IO、网络、温度与 Docker 容器资源占用。
+# 3. 灵活的多节点探针：中心端 Hub 收集各 Agent 节点数据，支持多服务器分布式监控与告警。
+# 4. 接入网关集成：通过 Traefik 反向代理 (beszel.${SITE_ADDRESS}) 统一接入 Web 控制台。
+# ==============================================================================
+
+services:
+  beszel:
+    image: henrygd/beszel:${BESZEL_VERSION:-0.21.0}
+    container_name: beszel
+    restart: unless-stopped
+    ports:
+      # 默认绑定本地回环 127.0.0.1，外部访问经由 Traefik 网关安全接入
+      - "${BESZEL_BIND:-127.0.0.1}:${BESZEL_PORT:-8090}:8090"
+    volumes:
+      - ${DATA_PATH:-./data/}beszel:/beszel_data
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - APP_URL=https://beszel.${SITE_ADDRESS}
+      # 可选：首次启动自动初始化管理员用户（也可在 Web UI 页面首次访问时注册）
+      # - USER_EMAIL=admin@example.com
+      # - USER_PASSWORD=your_secure_password
+    healthcheck:
+      test: ["CMD", "/beszel", "health", "--url", "http://127.0.0.1:8090"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 32M
+    networks:
+      - frontend
+      - backend

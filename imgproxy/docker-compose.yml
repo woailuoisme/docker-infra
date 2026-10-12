@@ -2,7 +2,7 @@ services:
   imgproxy:
     image: ghcr.io/imgproxy/imgproxy:${IMGPROXY_VERSION:-v4.0}
     container_name: imgproxy
-    restart: always
+    restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     ports:
