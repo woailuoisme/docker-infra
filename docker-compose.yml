@@ -35,7 +35,7 @@ include:
   - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
   - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
   - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
-  - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
+  # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
   - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
 
   # --- 7. 统一导航与管理门户 (Portals & Navigation) ---
