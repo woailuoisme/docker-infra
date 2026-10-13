@@ -35,14 +35,9 @@ jobs:
             {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres"},
             {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator"}
           ]'
-          SELECTED="${{ inputs.service }}"
-
-          if [ "$SELECTED" = "all" ]; then
-            echo "matrix={\"include\":$SERVICES}" >> "$GITHUB_OUTPUT"
-          else
-            FILTERED=$(echo "$SERVICES" | jq -c "[.[] | select(.service == \"$SELECTED\")]")
-            echo "matrix={\"include\":$FILTERED}" >> "$GITHUB_OUTPUT"
-          fi
+          MATRIX=$(echo "$SERVICES" | jq -c --arg s "${{ inputs.service }}" \
+            'if $s == "all" or $s == "" then {include: .} else {include: [.[] | select(.service == $s)]} end')
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
   build-and-push:
     name: Build & Push (${{ matrix.service }})
