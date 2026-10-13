@@ -12,6 +12,7 @@ on:
           - all
           - crowdsec
           - postgres
+          - simulator
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,6 +38,10 @@ jobs:
             context: ./postgres
             file: ./postgres/Dockerfile
             image: postgres
+          - service: simulator
+            context: ./simulator
+            file: ./simulator/Dockerfile
+            image: simulator
 
     steps:
       - name: Filter service
