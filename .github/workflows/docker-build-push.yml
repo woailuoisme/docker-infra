@@ -10,7 +10,6 @@ on:
         type: choice
         options:
           - all
-          - crowdsec
           - postgres
           - simulator
 
@@ -30,10 +29,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - service: crowdsec
-            context: ./crowdsec
-            file: ./crowdsec/Dockerfile
-            image: crowdsec
           - service: postgres
             context: ./postgres
             file: ./postgres/Dockerfile
