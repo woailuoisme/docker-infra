@@ -2,8 +2,8 @@ ARG POSTGRES_VERSION=18.6-trixie
 FROM postgres:${POSTGRES_VERSION}
 LABEL maintainer="seaside <531773730@qq.com>"
 
-ARG TIMEZONE=Asia/Shanghai
-ARG CHINA=true
+ARG TZ=Asia/Shanghai
+ARG CHINA=false
 
 # 切换镜像源 (Debian Trixie)
 RUN if [ "$CHINA" = "true" ]; then \
@@ -31,11 +31,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-18-postgis-3="${POSTGIS_VERSION}" \
     postgresql-18-pgvector="${PGVECTOR_VERSION}" \
     postgresql-18-cron="${PGCRON_VERSION}" \
+    barman-cli-cloud \
+    pigz \
     tzdata \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 设置系统时区
-RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/TZ
 
 # 复制优化后的配置文件
 COPY postgresql.conf /etc/postgresql/postgresql.conf
