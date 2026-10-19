@@ -37,13 +37,13 @@ include:
   - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
   - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
   # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
-  - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
+  # - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
 
   # --- 7. 统一导航与管理门户 (Portals & Navigation) ---
   - homepage/docker-compose.yml            # Homepage 统一运维与服务导航面板
 
   # --- 8. 业务应用与微服务 (Applications & Services) ---
-  - app/docker-compose.yml                 # bgin-api 核心业务服务与异步工作流
+  # - app/docker-compose.yml                 # bgin-api 核心业务服务与异步工作流
 
   # --- 9. 物联网、时序数据与设备模拟 (IoT & Time-Series Stack) ---
   - influxdb/docker-compose.yml            # InfluxDB 3 Apache Arrow 列式时序引擎与 Web 控制台
