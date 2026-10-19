@@ -10,19 +10,18 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 if [ -f "${ROOT_DIR}/.env" ]; then
 	set -a
-	# shellcheck disable=SC1091
 	source "${ROOT_DIR}/.env"
 	set +a
 fi
 
-CONTAINER_NAME="${GARAGE_CONTAINER_NAME:-garage}"
-KEY_NAME="${GARAGE_KEY_NAME:-default}"
-ZONE="${GARAGE_ZONE:-dc1}"
-CAPACITY="${GARAGE_CAPACITY:-100G}"
+CONTAINER_NAME="garage"
+KEY_NAME="default"
+ZONE="dc1"
+CAPACITY="100G"
 
 # 1. 检查容器运行状态与连通性
 if [ "$(docker inspect -f '{{.State.Running}}' "${CONTAINER_NAME}" 2> /dev/null)" != "true" ]; then
-	echo "[Garage] Error: Container '${CONTAINER_NAME}' is not running." >&2
+	echo "[Garage] [Error] Container '${CONTAINER_NAME}' is not running." >&2
 	echo "[Garage] Please start Garage first: docker compose up -d garage" >&2
 	exit 1
 fi
@@ -32,11 +31,12 @@ garage_exec() {
 }
 
 if ! garage_exec status > /dev/null 2>&1; then
-	echo "[Garage] Error: Unable to communicate with Garage daemon." >&2
+	echo "[Garage] [Error] Unable to communicate with Garage daemon." >&2
 	exit 1
 fi
 
 # 2. 检查并应用单节点集群布局 (Cluster Layout)
+echo "[Garage] [1/4] Checking cluster layout..."
 layout_output="$(garage_exec layout show 2> /dev/null || true)"
 if echo "${layout_output}" | grep -q "Current cluster layout version: 0" || ! echo "${layout_output}" | grep -q "==== CURRENT CLUSTER LAYOUT ===="; then
 	node_full_id="$(garage_exec node id | head -n1 | cut -d'@' -f1)"
@@ -49,6 +49,7 @@ else
 fi
 
 # 3. 检查并确保访问密钥存在 (Access Key)
+echo "[Garage] [2/4] Ensuring access key '${KEY_NAME}' exists..."
 existing_keys="$(garage_exec key list 2> /dev/null || true)"
 if echo "${existing_keys}" | grep -qw "${KEY_NAME}"; then
 	echo "[Garage] Access key '${KEY_NAME}' already exists."
@@ -61,6 +62,7 @@ else
 fi
 
 # 4. 幂等创建存储桶并配置权限 (Buckets & Permissions)
+echo "[Garage] [3/4] Ensuring buckets and permissions..."
 existing_buckets="$(garage_exec bucket list 2> /dev/null || true)"
 
 ensure_bucket() {
@@ -68,9 +70,9 @@ ensure_bucket() {
 	local perms="$2" # "rw" or "rwo"
 
 	if echo "${existing_buckets}" | grep -qw "${bucket}"; then
-		echo "[Garage] Bucket '${bucket}' already exists."
+		echo "[Garage]   Bucket '${bucket}' already exists."
 	else
-		echo "[Garage] Creating bucket '${bucket}'..."
+		echo "[Garage]   Creating bucket '${bucket}'..."
 		garage_exec bucket create "${bucket}" > /dev/null
 	fi
 
@@ -79,7 +81,7 @@ ensure_bucket() {
 		allow_flags+=(--owner)
 	fi
 
-	echo "[Garage] Ensuring permissions (${perms}) on bucket '${bucket}' for key '${KEY_NAME}'..."
+	echo "[Garage]   Ensuring permissions (${perms}) on bucket '${bucket}' for key '${KEY_NAME}'..."
 	garage_exec bucket allow "${bucket}" "${allow_flags[@]}" > /dev/null
 }
 
@@ -88,9 +90,9 @@ ensure_bucket "bgin" "rwo"
 
 # 5. 汇总展示当前集群状态
 echo ""
-echo "=== Cluster Status Summary ==="
+echo "[Garage] [4/4] Cluster status summary:"
 garage_exec bucket list
 echo ""
 garage_exec key list
 echo ""
-echo "[Garage] Initialization completed successfully."
+echo "[Garage] [OK] Initialization completed successfully."

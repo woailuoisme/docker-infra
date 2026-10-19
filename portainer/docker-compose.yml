@@ -10,7 +10,7 @@
 services:
   portainer:
     container_name: portainer
-    image: portainer/portainer-ce:${PORTAINER_VERSION:-2.45.2-alpine}
+    image: portainer/portainer-ce:2.45.2-alpine
     restart: unless-stopped
     init: true
     security_opt:
@@ -19,11 +19,10 @@ services:
       # 跳过首次启动 setup_token 验证，直接打开 Web UI 设置初始管理员密码
       - PORTAINER_NO_SETUP_TOKEN=1
     ports:
-      # 默认仅绑定本地回环 127.0.0.1，外部流量统一走 Traefik 域名接入
-      - "${PORTAINER_BIND:-127.0.0.1}:${PORTAINER_PORT:-9000}:9000"
+      - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${DATA_PATH:-./data/}portainer:/data
+      - ${DATA_PATH}portainer:/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9000/api/system/status"]
       interval: 15s

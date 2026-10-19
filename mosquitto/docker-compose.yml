@@ -1,18 +1,18 @@
 services:
   mosquitto:
-    image: eclipse-mosquitto:${MOSQUITTO_VERSION:-2.1-alpine}
+    image: eclipse-mosquitto:2.1-alpine
     container_name: mosquitto
     restart: unless-stopped
     ports:
-      - "${MQTT_PORT:-1883}:1883"
-      - "${MQTT_WS_PORT:-9001}:9001"
+      - "1883:1883"
+      - "9001:9001"
     volumes:
       - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./config/acl:/mosquitto/config/acl:ro
       - ./config/passwd:/mosquitto/config/passwd:ro
-      - ${DATA_PATH:-./data/}mosquitto/data:/mosquitto/data
+      - ${DATA_PATH}mosquitto/data:/mosquitto/data
     environment:
-      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - TZ=${TIMEZONE}
       - MQTT_USERNAME=${MQTT_USERNAME}
       - MQTT_PASSWORD=${MQTT_PASSWORD}
     healthcheck:

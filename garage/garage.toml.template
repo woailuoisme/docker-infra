@@ -1,0 +1,48 @@
+# ==============================================================================
+# Garage 分布式 S3 对象存储核心配置文件模板 (用于根据 .env 自动渲染)
+# ==============================================================================
+
+# 存储路径与数据库持久化目录
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+metadata_snapshots_dir = "/var/lib/garage/meta-snapshots"
+
+# 行业最佳实践：开启 6 小时自动元数据快照，防范异常停机或断电导致 LMDB 损坏
+metadata_auto_snapshot_interval = "6h"
+
+# 存储引擎与多副本策略 (单节点单副本配置)
+db_engine = "lmdb"
+replication_factor = 1
+
+# RPC 内部通信配置 (注: 敏感 secret 支持通过环境变量 GARAGE_RPC_SECRET 在运行期覆盖)
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+rpc_secret = "5368ea7003a35eebcaf25c618fab1c3ad1dbae01b8fc5d1fba4c737e5a955751"
+
+# --- S3 标准对象存储 API ---
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+# 支持 Path-Style 与 Virtual-Host 风格访问；由脚本从 .env 的 SITE_ADDRESS 自动渲染注入
+root_domain = ".s3.${SITE_ADDRESS}"
+
+# --- 管理与监控运维端点 (Admin & Metrics API) ---
+[admin]
+api_bind_addr = "[::]:3903"
+# 敏感凭据支持由 docker-compose.yml 环境变量 GARAGE_ADMIN_TOKEN / GARAGE_METRICS_TOKEN 动态重写
+admin_token = "A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ="
+metrics_token = "VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4="
+metrics_require_token = true
+
+# --- 特性裁剪与按需扩展 ---
+# 静态网站托管与匿名读取引擎 (已启用：为直连对象 URL 提供无需签名的读取端点；
+# 该端点与 S3 API 端口分离，未签名请求在 3900 上一律被拒)
+[s3_web]
+# 启用后仍需按桶显式开放: garage bucket website --allow <bucket>
+bind_addr = "[::]:3902"
+root_domain = ".s3.web.${SITE_ADDRESS}"
+index = "index.html"
+
+# [k2v_api]
+# 实验性 Key-Value 引擎 (集群内未使用，默认禁用以节约内存与监听端口)
+# api_bind_addr = "[::]:3904"

@@ -1,30 +1,27 @@
 services:
   garage:
-    image: dxflrs/garage:${GARAGE_VERSION:-v2.4.1}
+    image: dxflrs/garage:v2.4.1
     container_name: garage
     restart: unless-stopped
     command: /garage server
     security_opt:
       - no-new-privileges:true
     ports:
-      # S3 API: 默认绑定 127.0.0.1，公网统一由反向代理网关 (Traefik) 终结 HTTPS 接入
-      - "${GARAGE_S3_BIND:-127.0.0.1}:${GARAGE_S3_PORT:-3900}:3900"
-      # RPC 端口: 集群内部通信使用，单节点绑定 127.0.0.1 阻断外部扫描
-      - "${GARAGE_RPC_BIND:-127.0.0.1}:${GARAGE_RPC_PORT:-3901}:3901"
-      # Admin API: 节点管理与监控指标，仅本地回环可达
-      - "${GARAGE_ADMIN_BIND:-127.0.0.1}:${GARAGE_ADMIN_PORT:-3903}:3903"
+      # S3 API: 默认 3900，公网统一由反向代理网关 (Traefik) 终结 HTTPS 接入
+      - "3900:3900"
+      # 静态网站/匿名读取端点: 与 S3 API 分离（未签名请求在 3900 上会被拒）
+      - "3902:3902"
+      # RPC 端口: 集群内部通信使用
+      - "3901:3901"
+      # Admin API: 节点管理与监控指标
+      - "3903:3903"
     volumes:
       - ./garage.toml:/etc/garage.toml:ro
-      - ${DATA_PATH:-./data/}garage:/var/lib/garage
+      - ${DATA_PATH}garage:/var/lib/garage
     environment:
-      # 密钥凭据: 支持由 .env 动态重写覆盖 garage.toml，保障生产安全与密钥轮换
       GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
       GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
       GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN}
-      # 自动化初始化单节点与默认存储桶凭据
-      GARAGE_DEFAULT_ACCESS_KEY: ${GARAGE_DEFAULT_ACCESS_KEY}
-      GARAGE_DEFAULT_SECRET_KEY: ${GARAGE_DEFAULT_SECRET_KEY}
-      GARAGE_DEFAULT_BUCKET: default
       RUST_LOG: garage=info
     healthcheck:
       test: ["CMD", "/garage", "status"]
@@ -45,30 +42,24 @@ services:
       - frontend
 
   garage-webui:
-    image: khairul169/garage-webui:${GARAGE_WEBUI_VERSION:-1.1.0}
+    image: khairul169/garage-webui:1.1.0
     container_name: garage-webui
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     ports:
-      # 管理后台默认仅绑定 127.0.0.1，公网由反向代理统一接入并受 Authelia / SSO 双重保护
-      - "${GARAGE_WEBUI_BIND:-127.0.0.1}:${GARAGE_WEBUI_PORT:-3909}:3909"
+      - "3909:3909"
     tmpfs:
-      # 行业最佳实践：由于 upstream 镜像基于 scratch 构建缺少 /tmp 目录，
-      # 挂载 tmpfs 内存盘防止大文件分片上传时报错 (ParseMultipartForm)，同时避免宿主机磁盘 I/O 磨损
+      # 挂载 tmpfs 内存盘防止大文件分片上传时报错 (ParseMultipartForm)，避免宿主机磁盘 I/O 磨损
       - /tmp
     volumes:
-      # 同级直接挂载配置文件，自动读取 admin_token 与接口参数，保持单一真理源
       - ./garage.toml:/etc/garage.toml:ro
     environment:
       API_BASE_URL: "http://garage:3903"
       S3_ENDPOINT_URL: "http://garage:3900"
       S3_REGION: "garage"
       CONFIG_PATH: "/etc/garage.toml"
-      # 敏感令牌优先从环境变量读取并与 garage 保持严格同步
       API_ADMIN_KEY: "${GARAGE_ADMIN_TOKEN}"
-      # 可选内置认证: username:bcrypt_hash (生产环境通常由上层反向代理或 Authelia 统一鉴权)
-      # AUTH_USER_PASS: "${GARAGE_WEBUI_AUTH_USER_PASS:-}"
     depends_on:
       garage:
         condition: service_healthy

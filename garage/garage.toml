@@ -1,5 +1,5 @@
 # ==============================================================================
-# Garage 分布式 S3 对象存储核心配置文件
+# Garage 分布式 S3 对象存储核心配置文件模板 (用于根据 .env 自动渲染)
 # ==============================================================================
 
 # 存储路径与数据库持久化目录
@@ -23,8 +23,8 @@ rpc_secret = "5368ea7003a35eebcaf25c618fab1c3ad1dbae01b8fc5d1fba4c737e5a955751"
 [s3_api]
 s3_region = "garage"
 api_bind_addr = "[::]:3900"
-# 支持 Path-Style 访问；若需启用虚拟主机域名访问，请将 yourdomain.com 替换为实际泛域名
-root_domain = ".s3.yourdomain.com"
+# 支持 Path-Style 与 Virtual-Host 风格访问；由脚本从 .env 的 SITE_ADDRESS 自动渲染注入
+root_domain = ".s3.test.local"
 
 # --- 管理与监控运维端点 (Admin & Metrics API) ---
 [admin]
@@ -35,11 +35,13 @@ metrics_token = "VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4="
 metrics_require_token = true
 
 # --- 特性裁剪与按需扩展 ---
-# [s3_web]
-# 静态网站托管引擎 (若需通过 Bucket 直接托管前端静态网站，可取消注释并开放对应端口)
-# bind_addr = "[::]:3902"
-# root_domain = ".s3.web.yourdomain.com"
-# index = "index.html"
+# 静态网站托管与匿名读取引擎 (已启用：为直连对象 URL 提供无需签名的读取端点；
+# 该端点与 S3 API 端口分离，未签名请求在 3900 上一律被拒)
+[s3_web]
+# 启用后仍需按桶显式开放: garage bucket website --allow <bucket>
+bind_addr = "[::]:3902"
+root_domain = ".s3.web.test.local"
+index = "index.html"
 
 # [k2v_api]
 # 实验性 Key-Value 引擎 (集群内未使用，默认禁用以节约内存与监听端口)

@@ -7,5 +7,6 @@
 # 阻断级别由 justfile 中的 shellcheck --severity 显式控制。
 
 # 项目脚本包含容器入口脚本、交互式运维脚本和命令拼装场景；
+# SC1090, SC1091: 忽略动态路径/被 gitignore 的外部运行时配置文件 (.env)；
 # 以下规则作为仓库基线处理，后续可按服务逐步收紧。
-disable=SC2034,SC2046,SC2086,SC2155,SC2207,SC3037,SC3043,SC3048
+disable=SC1090,SC1091,SC2034,SC2046,SC2086,SC2155,SC2207,SC3037,SC3043,SC3048

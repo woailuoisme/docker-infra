@@ -10,15 +10,16 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENV_FILE="${ENV_FILE:-${ROOT_DIR}/.env}"
 
 if [ -f "${ENV_FILE}" ]; then
-	# shellcheck disable=SC1090
-	set -a && source "${ENV_FILE}" && set +a
+	set -a
+	source "${ENV_FILE}"
+	set +a
 fi
 
-INFLUXDB_HOST="${INFLUXDB_HOST:-127.0.0.1}"
-INFLUXDB_PORT="${INFLUXDB_PORT:-8181}"
-DB_NAME="${INFLUXDB_DATABASE:-iot}"
-TOKEN="${INFLUXDB_TOKEN:-apiv3_XThJgUrFlgd7oBCQywiJ5YZxY7QEA0bqgFIkusRZPmcVfVH4_0rOXSOWs6POUmyb_COkHRpcb7rGLBEXnU_fwg}"
-CONTAINER_NAME="${INFLUXDB_CONTAINER_NAME:-influxdb}"
+INFLUXDB_HOST="127.0.0.1"
+INFLUXDB_PORT="8181"
+DB_NAME="${INFLUXDB_DATABASE}"
+TOKEN="${INFLUXDB_TOKEN}"
+CONTAINER_NAME="influxdb"
 
 influx_exec() {
 	docker exec -e INFLUXDB3_AUTH_TOKEN="${TOKEN}" "${CONTAINER_NAME}" influxdb3 "$@"
@@ -36,7 +37,7 @@ PING_URL="http://${INFLUXDB_HOST}:${INFLUXDB_PORT}/ping"
 MAX_RETRIES=15
 COUNT=0
 
-echo "[InfluxDB] Waiting for API readiness (${PING_URL})..."
+echo "[InfluxDB] [1/2] Waiting for API readiness (${PING_URL})..."
 until curl -s -f "${PING_URL}" > /dev/null 2>&1; do
 	COUNT=$((COUNT + 1))
 	if [ "${COUNT}" -ge "${MAX_RETRIES}" ]; then
@@ -47,7 +48,7 @@ until curl -s -f "${PING_URL}" > /dev/null 2>&1; do
 done
 
 # 3. Create database if it does not already exist
-echo "[InfluxDB] Ensuring database '${DB_NAME}' exists..."
+echo "[InfluxDB] [2/2] Ensuring database '${DB_NAME}' exists..."
 output="$(influx_exec create database "${DB_NAME}" 2>&1 || true)"
 
 if echo "${output}" | grep -qi "already exists"; then
@@ -60,4 +61,4 @@ else
 	echo "[InfluxDB] Notice: ${output}"
 fi
 
-echo "[InfluxDB] Initialization complete. Database: ${DB_NAME}"
+echo "[InfluxDB] [OK] Initialization complete. Database: ${DB_NAME}"

@@ -10,13 +10,13 @@
 
 services:
   homepage:
-    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_VERSION:-v2.4}
+    image: ghcr.io/gethomepage/homepage:v2.4
     container_name: homepage
     restart: unless-stopped
     environment:
-      - PUID=${HOMEPAGE_PUID:-0}
-      - PGID=${HOMEPAGE_PGID:-0}
-      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - PUID=0
+      - PGID=0
+      - TZ=${TIMEZONE}
       - HOMEPAGE_ALLOWED_HOSTS=home.${SITE_ADDRESS},homepage.${SITE_ADDRESS},homepage,homepage:3000,localhost,localhost:33000,127.0.0.1,127.0.0.1:33000,*
       - HOMEPAGE_VAR_SITE_ADDRESS=${SITE_ADDRESS}
       - HOMEPAGE_VAR_DOMAIN=${SITE_ADDRESS}
@@ -24,8 +24,8 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
-      # 默认绑定本地回环 127.0.0.1，外部访问统一通过 Traefik 网关与 Authelia SSO 认证
-      - "${HOMEPAGE_BIND:-127.0.0.1}:${HOMEPAGE_PORT:-33000}:3000"
+      # 默认 33000，外部访问统一通过 Traefik 网关与 Authelia SSO 认证
+      - "33000:3000"
     volumes:
       - ./config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro

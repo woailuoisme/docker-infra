@@ -22,6 +22,7 @@ include:
   - mosquitto/docker-compose.yml           # Eclipse Mosquitto MQTT 物联网与设备消息 Broker
   - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
   - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
+  - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板
 
   # --- 5. 全文检索与动态媒体渲染 (Search & Media Processing) ---
   - meilisearch/docker-compose.yml         # Meilisearch 高性能轻量全文搜索引擎
@@ -49,6 +50,7 @@ include:
   - telegraf/docker-compose.yml            # Telegraf 统一 MQTT IoT 遥测消费与数据清洗通道
   - simulator/docker-compose.yml           # IoT 冷链智能售货机集群模拟器 (按需启动: profile iot)
 
+  - mailpit/docker-compose.yml             # Mailpit 邮件服务器与 Web 管理界面
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
 # ------------------------------------------------------------------------------

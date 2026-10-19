@@ -7,13 +7,13 @@ services:
       - server
     environment:
       - BAO_ADDR=http://127.0.0.1:8200
-      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - TZ=${TIMEZONE}
     volumes:
       - ./config/openbao.hcl:/openbao/config/openbao.hcl:ro
-      - ${DATA_PATH:-./data/}openbao/data:/openbao/file
-      - ${LOG_PATH:-./logs/}openbao:/openbao/logs
+      - ${DATA_PATH}openbao/data:/openbao/file
+      - ${LOG_PATH}openbao:/openbao/logs
     ports:
-      - "127.0.0.1:8200:8200"
+      - "8200:8200"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8200/v1/sys/health?uninitcode=200&sealedcode=200&standbycode=200"]
       interval: 15s
@@ -32,4 +32,3 @@ services:
       frontend:
         aliases:
           - open-bao
-

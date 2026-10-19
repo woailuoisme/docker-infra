@@ -13,11 +13,11 @@ KEYS_FILE="${ROOT_DIR}/open-bao/.keys.json"
 
 if [ ! -f "${ENV_FILE}" ]; then
 	ENV_FILE="${ROOT_DIR}/.env.example"
-	echo "Warning: .env not found, falling back to .env.example"
-fi
-if [ ! -f "${ENV_FILE}" ]; then
-	echo "Error: neither .env nor .env.example configuration file was found" >&2
-	exit 1
+	if [ ! -f "${ENV_FILE}" ]; then
+		echo "[Error] Neither .env nor .env.example configuration file was found" >&2
+		exit 1
+	fi
+	echo "[Warning] .env not found, falling back to .env.example"
 fi
 
 TOKEN="${BAO_TOKEN:-}"
@@ -25,7 +25,7 @@ if [ -z "${TOKEN}" ] && [ -f "${KEYS_FILE}" ]; then
 	TOKEN="$(jq -r '.root_token // empty' "${KEYS_FILE}" 2> /dev/null || true)"
 fi
 if [ -z "${TOKEN}" ]; then
-	echo "Error: missing valid OpenBao token (set BAO_TOKEN or run 'just bao-init')" >&2
+	echo "[Error] Missing valid OpenBao token (set BAO_TOKEN or run 'just bao-init')" >&2
 	exit 1
 fi
 
@@ -56,19 +56,19 @@ put_service_secrets() {
 
 	if [ "${#pairs[@]}" -gt 0 ]; then
 		bao_exec kv put "secret/${service}" "${pairs[@]}" > /dev/null
-		echo "  ✅ secret/${service} (${#pairs[@]} keys)"
+		echo "  [OK] secret/${service} (${#pairs[@]} keys)"
 	else
 		echo "  - secret/${service} (no configured values found, skipped)"
 	fi
 }
 
 # Ensure KV v2 engine is enabled at secret/
+echo "[1/2] Ensuring secret/ (KV v2) secrets engine is enabled..."
 if ! bao_exec secrets list -format=json | jq -e '."secret/"' > /dev/null 2>&1; then
-	echo "Initializing and enabling secret/ (KV v2) secrets engine..."
 	bao_exec secrets enable -version=2 -path=secret kv
 fi
 
-echo "Importing secrets from $(basename "${ENV_FILE}") to OpenBao (secret/*)..."
+echo "[2/2] Importing secrets from $(basename "${ENV_FILE}") to OpenBao (secret/*)..."
 
 put_service_secrets "traefik" "CF_API_TOKEN"
 put_service_secrets "crowdsec" "CROWDSEC_BOUNCER_KEY"
@@ -84,4 +84,4 @@ put_service_secrets "openobserve" "OPENOBSERVE_ROOT_PASSWORD" "O2_AUTH"
 put_service_secrets "beszel" "BESZEL_AGENT_KEY" "BESZEL_AGENT_TOKEN"
 put_service_secrets "umami" "UMAMI_APP_SECRET"
 
-echo "Sensitive secrets successfully imported to OpenBao!"
+echo "[OK] Sensitive secrets successfully imported to OpenBao!"

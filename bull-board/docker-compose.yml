@@ -1,0 +1,21 @@
+services:
+  bull-board:
+    image: ghcr.io/felixmosh/bull-board:9
+    container_name: bull-board
+    restart: unless-stopped
+    environment:
+      - BULL_BOARD_REDIS_URL=redis://:${REDIS_PASSWORD}@valkey:6379
+    ports:
+      - "3113:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
+    depends_on:
+      valkey:
+        condition: service_healthy
+    networks:
+      - backend

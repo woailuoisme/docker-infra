@@ -18,7 +18,7 @@ services:
       - MQTT_PORT=1883
       - MQTT_USERNAME=${MQTT_USERNAME}
       - MQTT_PASSWORD=${MQTT_PASSWORD}
-      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - TZ=${TIMEZONE}
     depends_on:
       - mosquitto
     networks:

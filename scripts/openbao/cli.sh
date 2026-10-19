@@ -13,8 +13,7 @@ if [ -f "${KEYS_FILE}" ]; then
 	TOKEN="$(jq -r '.root_token // empty' "${KEYS_FILE}" 2> /dev/null || true)"
 fi
 
-if [ -n "${TOKEN}" ]; then
-	docker exec -i -e BAO_ADDR="http://127.0.0.1:8200" -e BAO_TOKEN="${TOKEN}" openbao bao "$@"
-else
-	docker exec -i -e BAO_ADDR="http://127.0.0.1:8200" openbao bao "$@"
-fi
+BAO_ARGS=(-i -e BAO_ADDR="http://127.0.0.1:8200")
+[ -n "${TOKEN}" ] && BAO_ARGS+=(-e BAO_TOKEN="${TOKEN}")
+
+docker exec "${BAO_ARGS[@]}" openbao bao "$@"

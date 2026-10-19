@@ -1,6 +1,6 @@
 services:
   temporal:
-    image: temporalio/temporal:${TEMPORAL_VERSION:-1.9.1}
+    image: temporalio/temporal:1.9.1
     container_name: temporal
     restart: unless-stopped
     command:
@@ -14,18 +14,17 @@ services:
       - --metrics-port=9090
     ports:
       # Temporal Frontend gRPC 端口 (供 SDK 客户端与 Worker 连接)
-      - "${TEMPORAL_GRPC_PORT:-7233}:7233"
-      # Temporal Web UI 监控看板端口 (默认仅绑定本地回环 127.0.0.1，通过网关反代接入)
-      - "${TEMPORAL_UI_BIND:-127.0.0.1}:${TEMPORAL_UI_PORT:-8233}:8233"
+      - "7233:7233"
+      # Temporal Web UI 监控看板端口
+      - "8233:8233"
     environment:
-      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - TZ=${TIMEZONE}
       # 允许在反代/HTTP 开发环境下正常使用 Web UI Cookie
       - TEMPORAL_CSRF_COOKIE_INSECURE=true
       # 容器内 CLI 探针连接地址
       - TEMPORAL_CLI_ADDRESS=127.0.0.1:7233
     volumes:
-      # SQLite 嵌入式存储持久化路径 (安全默认值与自包含容错)
-      - ${DATA_PATH:-./data/}temporal:/etc/temporal
+      - ${DATA_PATH}temporal:/etc/temporal
     healthcheck:
       test: ["CMD", "temporal", "operator", "cluster", "health"]
       interval: 10s

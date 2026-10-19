@@ -12,7 +12,12 @@ default:
 init:
     @[ -f .env ] || cp .env.example .env
     @mkdir -p data logs
+    @./scripts/garage/render-config.sh
     @command -v lefthook >/dev/null 2>&1 && lefthook install || true
+
+# 渲染 Garage S3 配置文件 (根据 .env 自动生成 garage.toml)
+config-garage:
+    @./scripts/garage/render-config.sh
 
 # 初始化 Garage S3 存储桶与访问密钥 (default & bgin)
 init-garage:
@@ -24,6 +29,7 @@ cert domain="test.local":
 
 # 启动服务
 up service="":
+    @./scripts/garage/render-config.sh
     {{compose}} up -d {{service}}
 
 # 停止服务 (可传 flags="-v")

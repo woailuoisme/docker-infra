@@ -1,0 +1,10 @@
+services:
+  mailpit:
+    image: axllent/mailpit:v1.31
+    container_name: mailpit
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    restart: unless-stopped
+    networks:
+      - backend
