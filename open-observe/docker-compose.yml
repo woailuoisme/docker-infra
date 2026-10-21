@@ -1,6 +1,6 @@
 services:
   openobserve:
-    image: openobserve/openobserve:v1.0.4
+    image: openobserve/openobserve:v1.1.2
     container_name: openobserve
     restart: unless-stopped
     environment:

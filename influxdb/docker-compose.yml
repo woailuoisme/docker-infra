@@ -1,32 +1,8 @@
 services:
-  influxdb-init:
-    image: influxdb:3.11-core
-    container_name: influxdb-init
-    restart: "no"
-    environment:
-      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
-    volumes:
-      - ${DATA_PATH:-./data/}influxdb/data:/var/lib/influxdb3/data
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        cat <<EOF > /var/lib/influxdb3/data/admin-token.json
-        {
-          "token": "$${INFLUXDB_TOKEN}",
-          "name": "_admin"
-        }
-        EOF
-        chmod 600 /var/lib/influxdb3/data/admin-token.json
-    networks:
-      - backend
-
   influxdb:
-    image: influxdb:3.11-core
+    image: influxdb:3.12-core
     container_name: influxdb
     restart: unless-stopped
-    depends_on:
-      influxdb-init:
-        condition: service_completed_successfully
     command:
       - influxdb3
       - serve
@@ -57,31 +33,31 @@ services:
     networks:
       - backend
 
-  influxdb-ui:
-    image: influxdata/influxdb3-ui:1.11.0
-    container_name: influxdb-ui
-    restart: unless-stopped
-    environment:
-      - TZ=${TIMEZONE:-Asia/Shanghai}
-      - DEFAULT_INFLUX_SERVER=http://influxdb:8181
-      - DEFAULT_SERVER_NAME=Local-InfluxDB3
-      - DEFAULT_API_TOKEN=${INFLUXDB_TOKEN}
-      - DEFAULT_INFLUX_DATABASE=${INFLUXDB_DATABASE:-iot}
-      - UI_MODE=admin
-    volumes:
-      - ${DATA_PATH:-./data/}influxdb/ui:/db:rw
-    ports:
-      # Web Explorer 控制台端口
-      - "${INFLUXDB_UI_PORT:-8810}:8080"
-    depends_on:
-      influxdb:
-        condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "20m"
-        max-file: "3"
-    networks:
-      - frontend
-      - backend
+  # influxdb-ui:
+  #   image: influxdata/influxdb3-ui:1.11.0
+  #   container_name: influxdb-ui
+  #   restart: unless-stopped
+  #   environment:
+  #     - TZ=${TIMEZONE:-Asia/Shanghai}
+  #     - DEFAULT_INFLUX_SERVER=http://influxdb:8181
+  #     - DEFAULT_SERVER_NAME=Local-InfluxDB3
+  #     - DEFAULT_API_TOKEN=${INFLUXDB_TOKEN}
+  #     - DEFAULT_INFLUX_DATABASE=${INFLUXDB_DATABASE:-iot}
+  #     - UI_MODE=admin
+  #   volumes:
+  #     - ${DATA_PATH:-./data/}influxdb/ui:/db:rw
+  #   ports:
+  #     # Web Explorer 控制台端口
+  #     - "${INFLUXDB_UI_PORT:-8810}:8080"
+  #   depends_on:
+  #     influxdb:
+  #       condition: service_healthy
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "20m"
+  #       max-file: "3"
+  #   networks:
+  #     - frontend
+  #     - backend
 
