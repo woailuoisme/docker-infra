@@ -10,12 +10,11 @@
 
 services:
   beszel:
-    image: henrygd/beszel:${BESZEL_VERSION:-0.21.0}
+    image: henrygd/beszel:0.21
     container_name: beszel
     restart: unless-stopped
     ports:
-      # 默认绑定本地回环 127.0.0.1，外部访问经由 Traefik 网关安全接入
-      - "${BESZEL_BIND:-127.0.0.1}:${BESZEL_PORT:-8090}:8090"
+      - "8090:8090"
     volumes:
       - ${DATA_PATH:-./data/}beszel:/beszel_data
     environment:
@@ -30,13 +29,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 256M
-        reservations:
-          memory: 32M
     networks:
       - frontend
       - backend

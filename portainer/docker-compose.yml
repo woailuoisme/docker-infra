@@ -10,7 +10,7 @@
 services:
   portainer:
     container_name: portainer
-    image: portainer/portainer-ce:2.45.2-alpine
+    image: portainer/portainer-ce:2.45.3-alpine
     restart: unless-stopped
     init: true
     security_opt:

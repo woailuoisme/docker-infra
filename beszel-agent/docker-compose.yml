@@ -9,13 +9,13 @@
 
 services:
   beszel-agent:
-    image: henrygd/beszel-agent:${BESZEL_AGENT_VERSION:-0.21.0}
+    image: henrygd/beszel-agent:0.21
     container_name: beszel-agent
     restart: unless-stopped
     network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${DATA_PATH:-./data/}beszel-agent:/var/lib/beszel-agent
+      - ${DATA_PATH}beszel-agent:/var/lib/beszel-agent
     environment:
       - PORT=${BESZEL_AGENT_PORT:-45876}
       - KEY=${BESZEL_AGENT_KEY:-}
@@ -27,10 +27,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-        reservations:
-          memory: 32M

@@ -1,6 +1,6 @@
 services:
   meilisearch:
-    image: getmeili/meilisearch:v1.55
+    image: getmeili/meilisearch:v1.56
     container_name: meilisearch
     restart: unless-stopped
     command: meilisearch --config-file-path /meili_config/config.toml

@@ -20,6 +20,8 @@ include:
   # --- 4. 实时通信、消息队列与工作流 (Messaging & Workflows) ---
   - centrifugo/docker-compose.yml          # Centrifugo v6 实时 WebSocket / SSE 广播引擎
   - mosquitto/docker-compose.yml           # Eclipse Mosquitto MQTT 物联网与设备消息 Broker
+  # - rabbitmq/docker-compose.yml            # RabbitMQ AMQP 消息队列与 Web 管理后台
+  # - nats/docker-compose.yml                # NATS 高性能轻量消息与 JetStream 流引擎
   - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
   - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
   - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板

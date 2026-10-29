@@ -28,7 +28,8 @@ engine:
 # 客户端长连接与安全控制
 client:
   allow_anonymous_connect_without_token: false
-  allowed_origins: []  # 跨域白名单通过环境变量注入
+  allowed_origins:
+    - "*"
   ping_interval: 30s
   pong_timeout: 8s
   connection_limit: 10000
@@ -53,6 +54,8 @@ log:
 
 # 通道命名空间策略 (Channel Namespaces)
 channel:
+  without_namespace:
+    allow_subscribe_for_client: true
   history_meta_ttl: "720h"  # 30 天历史元数据保存
   
   namespaces:
@@ -89,7 +92,8 @@ channel:
       allow_recovery: true
       force_recovery: true
       allow_publish_for_subscriber: false
-      allow_subscribe_for_client: false
+      allow_subscribe_for_client: true
+      allow_user_limited_channels: true
     
     # notification: 瞬时消息/Toast 提醒，高吞吐量，关闭恢复以减轻 Valkey 压力
     - name: notification
