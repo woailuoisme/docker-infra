@@ -8,138 +8,122 @@ compose := "docker compose -f " + compose_file + " --env-file " + env_file
 default:
     @just --list
 
-# 初始化本地环境与 hooks
+# 初始化本地运行环境与 Git hooks
+[group: 'init']
 init:
     @[ -f .env ] || cp .env.example .env
     @mkdir -p data logs
     @./scripts/garage/render-config.sh
     @command -v lefthook >/dev/null 2>&1 && lefthook install || true
 
-# 渲染 Garage S3 配置文件 (根据 .env 自动生成 garage.toml)
-config-garage:
-    @./scripts/garage/render-config.sh
-
-# 初始化 Garage S3 存储桶与访问密钥 (default & bgin)
-init-garage:
-    @./scripts/garage/init-buckets.sh
-
 # 签发本地受信通配符证书
+[group: 'init']
 cert domain="test.local":
     @./scripts/certs/generate.sh "{{domain}}"
 
-# 启动服务
+# 启动服务 (默认后台运行)
+[group: 'services']
 up service="":
     @./scripts/garage/render-config.sh
     {{compose}} up -d {{service}}
 
-# 停止服务 (可传 flags="-v")
+# 停止服务 (支持 flags="-v")
+[group: 'services']
 down flags="":
     {{compose}} down {{flags}}
 
 # 重启服务
+[group: 'services']
 restart service="":
     {{compose}} restart {{service}}
 
-# 查看服务状态
+# 查看容器运行状态
+[group: 'services']
 ps service="":
     {{compose}} ps {{service}}
 
-# 跟踪服务日志
+# 跟踪容器实时日志
+[group: 'services']
 logs service="" tail="100":
     {{compose}} logs -f --tail={{tail}} {{service}}
 
+# 拉取最新镜像
+[group: 'services']
+pull service="":
+    {{compose}} pull {{service}}
+
 # 构建自定义镜像
+[group: 'services']
 build service="":
     {{compose}} build {{service}}
 
-# 渲染解析后的 Compose 配置
-config service="":
-    {{compose}} config {{service}}
+# 执行全量代码与配置静态检查
+[group: 'quality']
+lint:
+    {{compose}} config --quiet
+    hadolint postgres/Dockerfile dnsmasq/Dockerfile simulator/Dockerfile
+    find scripts/ postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shellcheck {} +
+    actionlint
+    rumdl check
 
-# 终端容器管理面板
-ui:
-    lazydocker
-
-# Compose 配置风险扫描
-scan:
-    trivy config .
-
-# 全量代码与配置检查
-lint: lint-compose lint-dockerfile lint-shell lint-actions lint-md
-
+# 校验 Compose 配置结构 (供 Git Hook 专用)
+[private]
 lint-compose:
     {{compose}} config --quiet
 
-lint-dockerfile:
-    hadolint postgres/Dockerfile dnsmasq/Dockerfile simulator/Dockerfile
-
-lint-shell:
-    find scripts/ postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shellcheck {} +
-
-lint-actions:
-    actionlint
-
-lint-md:
-    rumdl check
-
-# 格式化代码与文档
-fmt: fmt-shell fmt-md
-
-fmt-shell:
+# 格式化脚本与文档
+[group: 'quality']
+fmt:
     find scripts/ postgres/docker-entrypoint-initdb.d/ -name "*.sh" -exec shfmt -w {} +
-
-fmt-md:
     rumdl fmt
 
-# --- OpenBao 密钥与安全管理 ---
-# 初始化 OpenBao 集群并导出解封密钥至 open-bao/.keys.json
+# 渲染 Garage S3 配置文件 (根据 .env 自动生成 garage.toml)
+[group: 'garage']
+garage-config:
+    @./scripts/garage/render-config.sh
+
+# 初始化 Garage S3 默认存储桶与访问密钥
+[group: 'garage']
+garage-init:
+    @./scripts/garage/init-buckets.sh
+
+# 初始化 OpenBao 集群并导出解封密钥
+[group: 'security']
 bao-init:
     @./scripts/openbao/init.sh
 
 # 读取本地密钥解封 OpenBao 容器
+[group: 'security']
 bao-unseal:
     @./scripts/openbao/unseal.sh
 
-# 查看 OpenBao 容器运行与解封状态
-bao-status:
-    @docker exec openbao bao status
-
-# 容器内免密直通执行 bao CLI 命令 (自动注入 Root Token)
+# 容器内直通执行 bao CLI (自动注入 Root Token)
+[group: 'security']
 bao-cli +args:
     @./scripts/openbao/cli.sh {{args}}
 
-# 批量导入 .env 敏感变量至 OpenBao KV 密钥引擎
-bao-import-env:
+# 批量导入 .env 敏感变量至 OpenBao KV 引擎
+[group: 'security']
+bao-import:
     @./scripts/openbao/import-env.sh
 
-# --- IoT 物联网与时序数据栈 (IoT & Time-Series Stack) ---
-# 初始化 InfluxDB 3 时序数据库与 Token 校验
-init-iot:
+# 初始化 InfluxDB 3 数据库与 Token
+[group: 'iot']
+iot-init:
     @./scripts/iot/init-influx.sh
 
 # 启动 IoT 全栈服务 (Mosquitto + InfluxDB + Telegraf + Simulator)
+[group: 'iot']
 iot-up:
     {{compose}} --profile iot up -d mosquitto influxdb influxdb-ui telegraf simulator
-    @just init-iot
+    @just iot-init
 
 # 停止 IoT 服务组件
+[group: 'iot']
 iot-down flags="":
     {{compose}} --profile iot stop mosquitto influxdb influxdb-ui telegraf simulator {{flags}}
 
-# 查看 IoT 容器运行与健康状态
-iot-status:
-    {{compose}} --profile iot ps mosquitto influxdb influxdb-ui telegraf simulator
-
-# 跟踪 IoT 模拟器集群遥测日志
-iot-sim-logs tail="100":
-    {{compose}} logs -f --tail={{tail}} simulator
-
-# 跟踪 Telegraf 消费与入库日志
-iot-telegraf-logs tail="100":
-    {{compose}} logs -f --tail={{tail}} telegraf
-
-# 验证 IoT 完整链路连通性与 InfluxDB 数据入库状态
+# 验证 IoT 完整数据链路连通性与入库状态
+[group: 'iot']
 iot-test:
     @./scripts/iot/test-pipeline.sh
-
-

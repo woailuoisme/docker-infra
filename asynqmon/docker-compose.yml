@@ -12,12 +12,6 @@ services:
     ports:
       # 默认绑定本地回环 127.0.0.1，防范 Asynqmon 无鉴权管理后台向公网暴露
       - "${ASYNQMON_BIND:-127.0.0.1}:${ASYNQMON_PORT:-8500}:8080"
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 32M
     depends_on:
       valkey:
         condition: service_healthy

@@ -41,11 +41,3 @@ services:
     networks:
       - frontend
       - backend
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2048M
-        reservations:
-          cpus: "0.2"
-          memory: 512M

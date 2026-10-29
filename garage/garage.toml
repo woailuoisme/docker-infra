@@ -1,48 +1,65 @@
 # ==============================================================================
-# Garage 分布式 S3 对象存储核心配置文件模板 (用于根据 .env 自动渲染)
+# Garage 分布式 S3 对象存储配置模板 (.env 自动渲染)
 # ==============================================================================
 
-# 存储路径与数据库持久化目录
+# --- 1. 存储路径与数据库 ---
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
 metadata_snapshots_dir = "/var/lib/garage/meta-snapshots"
 
-# 行业最佳实践：开启 6 小时自动元数据快照，防范异常停机或断电导致 LMDB 损坏
+# 元数据自动快照周期 (防断电/异常停机损坏 LMDB)
 metadata_auto_snapshot_interval = "6h"
 
-# 存储引擎与多副本策略 (单节点单副本配置)
+# 存储引擎与多副本策略 (单节点单副本)
 db_engine = "lmdb"
 replication_factor = 1
+consistency_mode = "consistent"
 
-# RPC 内部通信配置 (注: 敏感 secret 支持通过环境变量 GARAGE_RPC_SECRET 在运行期覆盖)
+# --- 2. 块存储性能与并发 ---
+# 数据块分块大小 (默认 1M)
+block_size = "1M"
+# 内存缓冲区上限 (防并发写入内存暴涨)
+block_ram_buffer_max = "256MiB"
+# 并发读写限制
+block_max_concurrent_reads = 16
+block_max_concurrent_writes_per_request = 10
+# LMDB 虚拟内存映射上限
+lmdb_map_size = "1T"
+# 数据块 zstd 压缩级别 (1 为轻量快速压缩)
+compression_level = 1
+
+# I/O 写入优化：禁用逐块同步 fsync 换取低延迟与高吞吐
+metadata_fsync = false
+data_fsync = false
+
+# --- 3. RPC 内部通信 ---
+# (可用环境变量 GARAGE_RPC_SECRET 覆盖)
 rpc_bind_addr = "[::]:3901"
 rpc_public_addr = "127.0.0.1:3901"
 rpc_secret = "5368ea7003a35eebcaf25c618fab1c3ad1dbae01b8fc5d1fba4c737e5a955751"
 
-# --- S3 标准对象存储 API ---
+# --- 4. S3 API 服务 ---
 [s3_api]
 s3_region = "garage"
 api_bind_addr = "[::]:3900"
-# 支持 Path-Style 与 Virtual-Host 风格访问；由脚本从 .env 的 SITE_ADDRESS 自动渲染注入
+# Virtual-Host 根域名 (.env 注入)
 root_domain = ".s3.test.local"
+# 对外公开访问端点 (v2.5.0 推荐)
+public_endpoint = "https://s3.test.local"
+# 是否强制使用 Path-Style 风格返回公开 URL (false 为 Virtual-Host 风格)
+public_endpoint_path_style = false
 
-# --- 管理与监控运维端点 (Admin & Metrics API) ---
-[admin]
-api_bind_addr = "[::]:3903"
-# 敏感凭据支持由 docker-compose.yml 环境变量 GARAGE_ADMIN_TOKEN / GARAGE_METRICS_TOKEN 动态重写
-admin_token = "A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ="
-metrics_token = "VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4="
-metrics_require_token = true
-
-# --- 特性裁剪与按需扩展 ---
-# 静态网站托管与匿名读取引擎 (已启用：为直连对象 URL 提供无需签名的读取端点；
-# 该端点与 S3 API 端口分离，未签名请求在 3900 上一律被拒)
+# --- 5. 静态网站与匿名读取 ---
+# (需按桶开放: garage bucket website --allow <bucket>)
 [s3_web]
-# 启用后仍需按桶显式开放: garage bucket website --allow <bucket>
 bind_addr = "[::]:3902"
 root_domain = ".s3.web.test.local"
 index = "index.html"
 
-# [k2v_api]
-# 实验性 Key-Value 引擎 (集群内未使用，默认禁用以节约内存与监听端口)
-# api_bind_addr = "[::]:3904"
+# --- 6. 管理与监控端点 ---
+[admin]
+api_bind_addr = "[::]:3903"
+# 鉴权 Token (可通过环境变量覆盖)
+admin_token = "A5Q4zO27rJ4Xlz/Ojuoj2obCbL1aFGe9SugGt066loQ="
+metrics_token = "VZaAJqzH0ZhWjOGSen95AEyOgJEVYf/engNWdKIxoo4="
+metrics_require_token = true

@@ -29,14 +29,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
     networks:
       - frontend
       - backend

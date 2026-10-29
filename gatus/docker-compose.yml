@@ -24,13 +24,6 @@ services:
     environment:
       - TZ=${TIMEZONE:-Asia/Shanghai}
       - GATUS_CONFIG_PATH=/config/config.yaml
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-        reservations:
-          memory: 32M
     networks:
       - frontend
       - backend
