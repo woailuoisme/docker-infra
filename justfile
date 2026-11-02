@@ -127,3 +127,8 @@ iot-down flags="":
 [group: 'iot']
 iot-test:
     @./scripts/iot/test-pipeline.sh
+
+# 验证 Traefik 代理 MQTTS (TCP 8883 + PROXY Protocol v2) 生产配置与连通性
+[group: 'iot']
+test-mqtts:
+    @./scripts/iot/test-mqtts.sh

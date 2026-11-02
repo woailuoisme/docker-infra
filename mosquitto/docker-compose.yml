@@ -3,9 +3,10 @@ services:
     image: eclipse-mosquitto:2.1-alpine
     container_name: mosquitto
     restart: unless-stopped
+    # 生产安全加固：收敛外部明文暴露，外部设备强制经由 Traefik MQTTS(8883) 接入
+    # 宿主机仅绑定 127.0.0.1 本地回环供内部运维排障调试
     ports:
-      - "1883:1883"
-      - "9001:9001"
+      - "127.0.0.1:1883:1883"
     volumes:
       - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./config/acl:/mosquitto/config/acl:ro

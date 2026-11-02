@@ -1,7 +1,7 @@
 services:
   crowdsec:
     container_name: crowdsec
-    image: crowdsecurity/crowdsec:v1.8.1-slim
+    image: crowdsecurity/crowdsec:v1.8.2-slim
     restart: unless-stopped
     environment:
       - TZ=${TIMEZONE:-Asia/Shanghai}

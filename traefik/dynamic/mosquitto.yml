@@ -1,8 +1,36 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 # ==============================================================================
-# Eclipse Mosquitto MQTT 消息 Broker 路由配置 (MQTT over WebSocket)
-# 允许前端 Web / IoT 浏览器客户端通过 wss://mqtt.<domain> 进行长连接通信
+# Eclipse Mosquitto MQTT 消息 Broker 路由配置
+# 1. TCP MQTTS: 8883 原生加密长连接 (TLS 卸载 + PROXY Protocol v2 保持真实客户端 IP)
+# 2. HTTP WSS: 443 WebSocket 协议 (供 Web/H5/小程序长连接使用)
 # ==============================================================================
+
+tcp:
+  routers:
+    # MQTTS 路由器 (基于 SNI 匹配设备连接域名)
+    mosquitto-mqtts:
+      rule: 'HostSNI(`mqtt.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - mqtts
+      service: mosquitto-tcp-service
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    # Mosquitto TCP 负载均衡后端 (转发至内部 1884 PROXY 专用端口)
+    mosquitto-tcp-service:
+      loadBalancer:
+        serversTransport: mosquitto-proxy-transport
+        servers:
+          - address: "mosquitto:1884"
+
+  serversTransports:
+    # 注入 PROXY Protocol v2 协议头，向 Mosquitto 传递真实客户端 IP
+    mosquitto-proxy-transport:
+      dialTimeout: "30s"
+      dialKeepAlive: "15s"
+      proxyProtocol:
+        version: 2
 
 http:
   routers:
@@ -13,7 +41,7 @@ http:
       service: mosquitto-ws-service
       tls: {}
       middlewares:
-        - chain-basic@file
+        - chain-realtime@file
 
   services:
     mosquitto-ws-service:

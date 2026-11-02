@@ -1,10 +1,10 @@
 # ==============================================================================
 # Mosquitto 主题访问控制列表 (Access Control List)
-# 生产最佳实践：基于角色与通配模式（Pattern）隔离设备与租户
+# 生产最佳实践：基于角色与多代版本规范（Versioning Pattern）隔离设备与租户
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# 1. 超级管理员 (Admin)
+# 1. 超级管理员与微服务统一收集通道 (Admin)
 # 拥有对所有业务主题及系统监控主题 ($SYS) 的完全读写权限
 # ------------------------------------------------------------------------------
 user admin
@@ -12,22 +12,27 @@ topic readwrite #
 topic readwrite $SYS/#
 
 # ------------------------------------------------------------------------------
-# 2. 租户与 IoT 设备模式化隔离 (Pattern ACL - 行业推荐做法)
-# %u = 客户端认证用户名 (Username)
+# 2. 租户与 IoT 设备模式化隔离 (Pattern ACL - 行业推荐双代版本控制规范)
+# %u = 客户端认证用户名 (Username / Device ID)
 # %c = 客户端唯一标识 (Client ID)
 # ------------------------------------------------------------------------------
 # 用户名专属命名空间：每个账号仅能读写自身用户名下的主题
 pattern readwrite %u/#
 
-# 标准 IoT 设备遥测与控制链路：
-# 设备上报遥测：device/<username>/telemetry
-# 服务端下发控制：device/<username>/command
+# --- V1 版本通信规范 (JSON 格式 / 当前主力版本) ---
+# 通用 IoT 设备标准链路: v1/device/{username}/... (上报 telemetry, 下发 command 等)
+pattern readwrite v1/device/%u/#
+# 智能售货机专用规范链路: v1/vm/{username}/... (遥测 telemetry, 事件 events, 状态 status 等)
+pattern readwrite v1/vm/%u/#
+# 兼容未带版本前缀的历史设备链路:
 pattern readwrite device/%u/#
 
-# IoT 售货机 V1.0 规范命名空间 (v1/vm/{device_no}/...)
-pattern readwrite v1/vm/%u/#
+# --- V2 版本通信规范 (预留 Protobuf / 紧凑型二进制 / MQTT 5.0 高性能新链路) ---
+pattern readwrite v2/device/%u/#
+pattern readwrite v2/vm/%u/#
 
-# 基于 Client ID 的物理设备隔离：
+# --- 基于 Client ID 的物理设备硬件隔离链路 ---
+pattern readwrite v1/devices/%c/#
 pattern readwrite devices/%c/#
 
 # ------------------------------------------------------------------------------

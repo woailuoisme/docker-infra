@@ -1,6 +1,6 @@
 services:
   mailpit:
-    image: axllent/mailpit:v1.32
+    image: axllent/mailpit:v1.33
     container_name: mailpit
     ports:
       - "1025:1025" # SMTP

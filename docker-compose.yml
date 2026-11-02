@@ -5,6 +5,8 @@
 include:
   # --- 1. 网络与反向代理网关 (Edge Gateway & Ingress) ---
   - traefik/docker-compose.yml             # Traefik v3 边缘网关、HTTP/3、动态路由与 Let's Encrypt 证书签发
+  - sablier/docker-compose.yml             # Sablier v1.19.1 容器动态实时监控与调度
+  - error-pages/docker-compose.yml         # 统一现代化 HTTP 4xx/5xx 自定义美化错误页服务
   - dnsmasq/docker-compose.yml             # DNSMasq 本地 DNS 解析服务
   # --- 2. 安全合规与入侵防御 (Security & Compliance) ---
   - crowdsec/docker-compose.yml            # CrowdSec 行为分析、恶意 IP 自动化封禁与 AppSec WAF
@@ -13,6 +15,7 @@ include:
 
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
   - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
+  - pgbouncer/docker-compose.yml
   # - pgbackups/docker-compose.yml           # PostgreSQL 自动化定时备份与多层轮转归档
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
@@ -29,6 +32,7 @@ include:
 
   # --- 5. 全文检索与动态媒体渲染 (Search & Media Processing) ---
   - meilisearch/docker-compose.yml         # Meilisearch 高性能轻量全文搜索引擎
+  # - sonic/docker-compose.yml               # Sonic 极速轻量低内存全文搜索与联想补全后端
   - imgproxy/docker-compose.yml            # imgproxy 快速安全动态图片缩放、格式协商与裁剪服务
 
   # --- 6. 统一可观测性与运维监控 (Observability & Ops) ---

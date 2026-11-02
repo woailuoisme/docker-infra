@@ -27,6 +27,7 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      - "8883:8883"
     healthcheck:
       test: ["CMD", "traefik", "healthcheck", "--ping"]
       interval: 10s
@@ -34,7 +35,13 @@ services:
       retries: 3
       start_period: 5s
     depends_on:
+      authelia:
+        condition: service_healthy
       crowdsec:
+        condition: service_healthy
+      error-pages:
+        condition: service_healthy
+      sablier:
         condition: service_healthy
     networks:
       - frontend

@@ -226,3 +226,34 @@ http:
         middlewares:
           - security-headers
 
+    # --------------------------------------------------------------------------
+    # 15. Sablier 按需冷启动中间件 (闲置 15 分钟自动关机，请求到来时自动拉起)
+    # --------------------------------------------------------------------------
+    sablier-default:
+      plugin:
+        sablier:
+          sablierUrl: "http://sablier:10000"
+          sessionDuration: 15m
+          dynamic:
+            displayName: "DevOps Service"
+            showDetails: true
+            theme: "hacker-terminal"
+            refreshFrequency: 2s
+
+    # --------------------------------------------------------------------------
+    # 16. Souin RFC 7234 HTTP 响应缓存中间件 (专用于 imgproxy 等静态/计算密集型服务)
+    # 官方文档: https://docs.souin.io/docs/middlewares/tr%C3%A6fik/
+    # 模式: 本地内存高速缓存 (Go 进程内 0 延迟命中)
+    # --------------------------------------------------------------------------
+    imgproxy-cache:
+      plugin:
+        souin:
+          default_cache:
+            ttl: 2592000s # 默认 30 天，严格遵循 imgproxy 返回的 Cache-Control
+            allowed_http_verbs:
+              - GET
+              - HEAD
+            default_cache_control: "public, max-age=2592000, immutable"
+          log_level: info
+
+

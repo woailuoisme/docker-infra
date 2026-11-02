@@ -1,34 +1,68 @@
 services:
   imgproxy:
-    image: ghcr.io/imgproxy/imgproxy:${IMGPROXY_VERSION:-v4.0}
+    image: ghcr.io/imgproxy/imgproxy:v4.0
     container_name: imgproxy
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     ports:
-      # 默认绑定本地回环 127.0.0.1，统一经反向代理网关 (Traefik) 实现边缘缓存与加速
-      - "${IMGPROXY_BIND:-127.0.0.1}:${IMGPROXY_PORT:-8088}:8080"
+      # 绑定本地回环，统一由 Traefik 网关与 CDN 终结流量
+      - "127.0.0.1:8088:8080"
     environment:
+      # --- 1. 签名防刷保护 (敏感凭据，从 .env 注入) ---
       - IMGPROXY_KEY=${IMGPROXY_KEY}
       - IMGPROXY_SALT=${IMGPROXY_SALT}
-      # 是否允许未签名 URL 访问 (开发调试设为 true，生产环境可在 .env 中重写为 false)
-      - IMGPROXY_INSECURE_URLS=${IMGPROXY_INSECURE_URLS:-true}
-      # 开发错误调试模式 (响应 Header 及日志中输出详细错误堆栈)
-      - IMGPROXY_DEVELOPMENT_ERRORS_MODE=${IMGPROXY_DEVELOPMENT_ERRORS_MODE:-true}
-      # 本地文件系统根目录 (配合 local:/// 协议直接读取挂载目录图片)
-      - IMGPROXY_LOCAL_FILESYSTEM_ROOT=/mnt
-      # 自适应图片格式协商
-      - IMGPROXY_ENABLE_WEBP_DETECTION=${IMGPROXY_ENABLE_WEBP_DETECTION:-true}
-      - IMGPROXY_ENABLE_AVIF_DETECTION=${IMGPROXY_ENABLE_AVIF_DETECTION:-true}
-    volumes:
-      # 业务上传文件与本地媒体只读挂载
-      - ${DATA_PATH}:/mnt/data:ro
+      # 是否允许未签名访问 (开发/联调为 true，生产发布建议改为 false 强制防篡改签名)
+      - IMGPROXY_INSECURE_URLS=true
+
+      # --- 2. 独占对接 Garage (S3 内部高速网络) ---
+      - IMGPROXY_USE_S3=true
+      - IMGPROXY_S3_ENDPOINT=http://garage:3900
+      - AWS_ACCESS_KEY_ID=${GARAGE_DEFAULT_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${GARAGE_DEFAULT_SECRET_KEY}
+      - AWS_REGION=garage
+
+      # --- 3. CDN 与浏览器长效缓存协商 (HTTP 规范) ---
+      # 告知 CDN/浏览器静态结果缓存 1 年 (Cache-Control: public, max-age=31536000)
+      - IMGPROXY_TTL=31536000
+      # 启用 ETag 标头，支持 304 Not Modified 协商缓存
+      - IMGPROXY_USE_ETAG=true
+      # 客户端自适应格式协商 (按 Accept 头无缝转换 WebP / AVIF)
+      - IMGPROXY_ENABLE_WEBP_DETECTION=true
+      - IMGPROXY_ENABLE_AVIF_DETECTION=true
+
+      # --- 4. 并发限制与熔断反压 (保护 CPU / 内存) ---
+      # 最大并发图片转码数 (与 deploy 2.0 CPU 配比)
+      - IMGPROXY_WORKERS=4
+      # 突发任务排队上限 (超出队列立即返回 429 Too Many Requests 防雪崩)
+      - IMGPROXY_REQUESTS_QUEUE_SIZE=100
+      # 超时控制 (单图处理 10s，源图拉取 5s)
+      - IMGPROXY_TIMEOUT=10
+      - IMGPROXY_DOWNLOAD_TIMEOUT=5
+
+      # --- 5. 内存分配与碎片优化 ---
+      # 使用 jemalloc 避免高频图处理产生的内存碎片泄露假象
+      - IMGPROXY_MALLOC=jemalloc
+      # 每隔 10 秒主动向 OS 归还未使用的物理内存
+      - IMGPROXY_FREE_MEMORY_INTERVAL=10
+
+      # --- 6. 防像素炸弹与异常信息脱敏 ---
+      - IMGPROXY_MAX_SRC_RESOLUTION=50.0
+      - IMGPROXY_DEVELOPMENT_ERRORS_MODE=false
     healthcheck:
       test: ["CMD", "imgproxy", "health"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
     networks:
       - frontend
       - backend

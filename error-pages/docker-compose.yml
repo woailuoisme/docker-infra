@@ -1,0 +1,19 @@
+services:
+  error-pages:
+    image: tarampampam/error-pages:4.2
+    container_name: error-pages
+    restart: unless-stopped
+    environment:
+      # 主题模板: app-down, cats, connection, ghost, hacker-terminal, l7, lost-in-space, noise, orient, shuffle, win98
+      TEMPLATE_NAME: l7
+      # 开启暗色模式支持 (按客户端系统首选项自适应)
+      SHOW_DETAILS: "false"
+    healthcheck:
+      test: ["CMD", "/usr/bin/wget", "--spider", "-q", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 3s
+    networks:
+      - frontend
+

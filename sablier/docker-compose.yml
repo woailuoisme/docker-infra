@@ -1,0 +1,21 @@
+services:
+  sablier:
+    container_name: sablier
+    image: sablierapp/sablier:1.19.1 # x-release-please-version
+    restart: unless-stopped
+    command:
+      - start
+      - --provider.name=docker
+    healthcheck:
+      test: ["CMD", "sablier", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 3s
+    ports:
+      - "127.0.0.1:10000:10000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
+      - frontend

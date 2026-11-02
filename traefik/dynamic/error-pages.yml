@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Error-Pages 统一优雅 HTTP 错误拦截与兜底路由配置 (Error Pages Router & Service)
+# 针对 400-599 状态码统一渲染主题错误页，并支持未匹配域名的兜底响应 (Catch-All)
+# ==============================================================================
+
+http:
+  routers:
+    # 兜底 Router：当访问不存在或未配置的域名/主机头时，由该低优先级路由兜底并返回美化的 404 错误页
+    error-pages-catchall:
+      rule: "HostRegexp(`.+`)"
+      priority: 1
+      entryPoints:
+        - websecure
+      service: error-pages-service
+      tls: {}
+      middlewares:
+        - error-pages@file
+
+  middlewares:
+    # 统一 HTTP 错误拦截中间件
+    # 拦截后端返回的 400-599 状态码，自动向 error-pages 服务请求 /{status} 对应主题页面
+    # 支持内容协商 (Content Negotiation): 浏览器返回 HTML，API/curl 客户端返回结构化 JSON
+    error-pages:
+      errors:
+        status:
+          - "400-599"
+        service: error-pages-service
+        query: "/{status}"
+
+  services:
+    # Error-Pages 内部服务定义 (运行在 frontend 网络，端口 8080)
+    error-pages-service:
+      loadBalancer:
+        servers:
+          - url: "http://error-pages:8080"
+        passHostHeader: true
+

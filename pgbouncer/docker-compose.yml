@@ -1,0 +1,50 @@
+services:
+  pgbouncer:
+    image: pgbouncer/pgbouncer:1.25
+    container_name: pgbouncer
+    restart: unless-stopped
+    ports:
+      # PgBouncer 连接池监听端口
+      - "6432:6432"
+    environment:
+      # 后端 PostgreSQL 主机与端口
+      - DATABASES_HOST=postgres
+      - DATABASES_PORT=5432
+      # 后端数据库连接凭据
+      - DATABASES_USER=${POSTGRES_USER:-postgres}
+      - DATABASES_PASSWORD=${POSTGRES_PASSWORD}
+      # 允许透传连接任意客户端请求的数据库 (* 代表通配所有 DB)
+      - DATABASES_CLIENT_SIDE_DBNAME=*
+      # 监听地址与端口
+      - PGBOUNCER_LISTEN_ADDR=0.0.0.0
+      - PGBOUNCER_LISTEN_PORT=6432
+      # 连接池模式 (transaction 事务级 / session 会话级 / statement 语句级)
+      - PGBOUNCER_POOL_MODE=transaction
+      # 允许接入的最大客户端总连接数
+      - PGBOUNCER_MAX_CLIENT_CONN=200
+      # 单个“用户+数据库”对后端的默认连接池大小
+      - PGBOUNCER_DEFAULT_POOL_SIZE=25
+      # 保持与后端的最小常驻空闲连接数
+      - PGBOUNCER_MIN_POOL_SIZE=5
+      # 突发流量下的额外预留突增连接数
+      - PGBOUNCER_RESERVE_POOL_SIZE=5
+      # 单个数据库允许建立的最大后端连接数
+      - PGBOUNCER_MAX_DB_CONNECTIONS=50
+      # 单个数据库用户允许建立的最大后端连接数
+      - PGBOUNCER_MAX_USER_CONNECTIONS=50
+      # 密码认证机制 (与 PostgreSQL 14+ 推荐的 scram-sha-256 保持一致)
+      - PGBOUNCER_AUTH_TYPE=scram-sha-256
+      # 具备管理库 (pgbouncer) 控制权限的管理员用户列表
+      - PGBOUNCER_ADMIN_USERS=postgres
+      # 忽略客户端驱动传入的特殊启动参数，避免事务池模式报错
+      - PGBOUNCER_IGNORE_STARTUP_PARAMETERS=extra_float_digits,search_path
+    networks:
+      - backend
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 6432 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
