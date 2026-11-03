@@ -5,6 +5,7 @@
 include:
   # --- 1. 网络与反向代理网关 (Edge Gateway & Ingress) ---
   - traefik/docker-compose.yml             # Traefik v3 边缘网关、HTTP/3、动态路由与 Let's Encrypt 证书签发
+  # - caddy/docker-compose.yml
   - sablier/docker-compose.yml             # Sablier v1.19.1 容器动态实时监控与调度
   - error-pages/docker-compose.yml         # 统一现代化 HTTP 4xx/5xx 自定义美化错误页服务
   - dnsmasq/docker-compose.yml             # DNSMasq 本地 DNS 解析服务
