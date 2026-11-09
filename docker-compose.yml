@@ -59,6 +59,7 @@ include:
   - simulator/docker-compose.yml           # IoT 冷链智能售货机集群模拟器 (按需启动: profile iot)
 
   - mailpit/docker-compose.yml             # Mailpit 邮件服务器与 Web 管理界面
+  - trailbase/docker-compose.yml
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
 # ------------------------------------------------------------------------------

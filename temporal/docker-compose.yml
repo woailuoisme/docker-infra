@@ -1,6 +1,6 @@
 services:
   temporal:
-    image: temporalio/temporal:1.9.1
+    image: temporalio/temporal:1.10.0
     container_name: temporal
     restart: unless-stopped
     command:

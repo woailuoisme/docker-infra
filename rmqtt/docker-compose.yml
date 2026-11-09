@@ -1,0 +1,20 @@
+# docker-compose.yaml
+version: '3'
+
+services:
+  rmqtt:
+    container_name: rmqtt
+    image: rmqtt/rmqtt:0.24.0
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /app/rmqtt-single/etc/:/app/rmqtt/etc
+      - /app/rmqtt-single/log:/var/log/rmqtt
+    ports:
+      - "1883:1883"
+      - "8080:8080"
+      - "8883:8883"
+      - "11883:11883"
+      - "6060:6060"
+    restart: always
+    command: -f ./etc/rmqtt.toml --id 1
+    privileged: true

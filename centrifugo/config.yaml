@@ -1,107 +1,90 @@
-# Centrifugo v6 生产级配置
-# 官方参考: https://centrifugal.dev/docs/server/configuration
-
-# 传输协议配置 (Transports)
+# ============================================================
+# Centrifugo v6.10.2 · 生产基线配置
+#
+# 设计原则
+#   1. 本文件只声明行为策略，不保存任何密钥；密钥统一由环境变量注入
+#      （优先级：命令行 flag > ENV > 本文件）。
+#   2. 单端口对外（8000）：客户端传输与 HTTP API 同端口，API 由 key 鉴权。
+#   3. 未显式声明的选项一律沿用官方默认值，保持文件可读。
+#
+# 校验：centrifugo checkconfig -c /centrifugo/config.yaml
+# ============================================================
+# 更强隔离（API/Admin/指标不落公网）可改为双监听：
+#   http_server: { internal_port: "10000" }
+# 同时把后端的 CENTRIFUGO_URL 指向该端口，并为前端单独下发连接地址。
+# ---------------- 传输层 ----------------
 websocket:
   use_write_buffer_pool: true
-  message_size_limit: 65536  # 64KB 单条消息上限，防止 DoS
-
-uni_websocket:
-  enabled: true
-
-http_stream:
-  enabled: true
-
+  write_timeout: "1s"
+  message_size_limit: 65536
+  # compression: true   # permessage-deflate 以 CPU 换带宽，仅小消息高流量场景开启
 sse:
   enabled: true
-
+http_stream:
+  enabled: true
+uni_websocket:
+  enabled: true
 uni_sse:
   enabled: true
-
-# 消息引擎配置 (通过环境变量 CENTRIFUGO_ENGINE_REDIS_ADDRESS 动态注入连接)
+# ---------------- 引擎（Valkey / Redis） ----------------
 engine:
   type: redis
   redis:
-    connect_timeout: "1s"
-    io_timeout: "4s"
-
-# 客户端长连接与安全控制
+    # address 由 CENTRIFUGO_ENGINE_REDIS_ADDRESS 注入（含密码）
+    prefix: "centrifugo"
+    connect_timeout: "5s"
+    io_timeout: "5s"
+# ---------------- 客户端连接与认证 ----------------
 client:
+  token:
+    audience: "centrifugo"   # 密钥 ← CENTRIFUGO_CLIENT_TOKEN_HMAC_SECRET_KEY
   allow_anonymous_connect_without_token: false
-  allowed_origins:
-    - "*"
-  ping_interval: 30s
-  pong_timeout: 8s
+  disallow_anonymous_connection_tokens: true
+  # origin 白名单由 CENTRIFUGO_CLIENT_ALLOWED_ORIGINS 注入（空格分隔）
+  ping_interval: "25s"
+  pong_timeout: "8s"
   connection_limit: 10000
   user_connection_limit: 10
-  queue_max_size: 1048576  # 1MB 客户端单连接发送缓冲区上限
-  stale_close_delay: "10s"
-
-# 管理后台与可观测性
-admin:
-  enabled: true
-  handler_prefix: "/admin"
-
-health:
-  enabled: true
-
-prometheus:
-  enabled: true
-
-# 日志配置
-log:
-  level: info
-
-# 通道命名空间策略 (Channel Namespaces)
+  connection_rate_limit: 300   # 每节点每秒新建连接上限，抵御重连风暴
+  channel_limit: 128
+  queue_max_size: 1048576
+  history_max_publication_limit: 300
+  recovery_max_publication_limit: 300
+# ---------------- 通道与命名空间 ----------------
 channel:
-  without_namespace:
-    allow_subscribe_for_client: true
-  history_meta_ttl: "720h"  # 30 天历史元数据保存
-  
+  history_meta_ttl: "1h"     # 略大于最长 history_ttl 即可，避免 Redis 元信息长期堆积
+  # subscribe proxy 的 endpoint/timeout 由 CENTRIFUGO_CHANNEL_PROXY_SUBSCRIBE_* 注入
   namespaces:
-    # public: 公共大厅/广播场景，开启断线消息自动补偿 (recovery)，仅允许服务端 API 发布
-    - name: public
+    - name: public            # 公开广播 / 共享房间
       presence: true
       join_leave: true
       history_size: 100
       history_ttl: "300s"
-      allow_recovery: true
       force_recovery: true
-      allow_publish_for_subscriber: false
       allow_subscribe_for_client: true
-      allow_subscribe_for_anonymous: false
-      allow_publish_for_anonymous: false
-    
-    # private: 私有与敏感业务频道，须凭订阅 Token 准入，禁用客户端直接 publish
-    - name: private
+    - name: private           # 私有会话 / 订单
+      subscribe_proxy_enabled: true
       presence: true
       join_leave: true
       history_size: 50
       history_ttl: "300s"
-      allow_recovery: true
       force_recovery: true
-      allow_publish_for_subscriber: false
-      allow_subscribe_for_client: false
-    
-    # user: 用户个人通知频道，关闭 presence 和 join_leave 节省存储与网络开销
-    - name: user
-      presence: false
-      join_leave: false
+    - name: user              # 用户个人频道
+      subscribe_proxy_enabled: true
       history_size: 50
       history_ttl: "300s"
-      allow_recovery: true
       force_recovery: true
-      allow_publish_for_subscriber: false
-      allow_subscribe_for_client: true
-      allow_user_limited_channels: true
-    
-    # notification: 瞬时消息/Toast 提醒，高吞吐量，关闭恢复以减轻 Valkey 压力
-    - name: notification
-      presence: false
-      join_leave: false
-      history_size: 10
-      history_ttl: "60s"
-      allow_recovery: false
-      force_recovery: false
-      allow_publish_for_subscriber: false
-      allow_subscribe_for_client: true
+    - name: notification      # 高吞吐通知：不做历史与在线状态
+      subscribe_proxy_enabled: true
+# ---------------- 运维面 ----------------
+admin:
+  enabled: true
+  handler_prefix: "/admin"   # 凭据 ← CENTRIFUGO_ADMIN_PASSWORD / CENTRIFUGO_ADMIN_SECRET
+health:
+  enabled: true
+prometheus:
+  enabled: true
+log:
+  level: info
+shutdown:
+  timeout: "30s"

@@ -1,0 +1,8 @@
+services:
+  trailbase:
+    image: trailbase/trailbase:0.35.11
+    container_name: trailbase
+    ports:
+      - "4000:4000"
+    networks:
+      - backend

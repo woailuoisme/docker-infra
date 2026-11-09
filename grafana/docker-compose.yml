@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: grafana/grafana:${GRAFANA_VERSION:-13.2-slim}
+    image: grafana/grafana:13.3-slim
     container_name: grafana
     restart: unless-stopped
     ports:

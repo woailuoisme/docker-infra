@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: amir20/dozzle:v11
+    image: amir20/dozzle:v11.4-alpine
     restart: unless-stopped
     ports:
       # 默认仅绑定本地回环 127.0.0.1，由反向代理统一暴露并受 Authelia / SSO 双重保护
