@@ -11,6 +11,8 @@ on:
         options:
           - all
           - postgres
+          - dnsmasq
+          - caddy-base
           - simulator
 
 concurrency:
@@ -33,6 +35,8 @@ jobs:
         run: |
           SERVICES='[
             {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres"},
+            {"service": "dnsmasq", "context": "./dnsmasq", "file": "./dnsmasq/Dockerfile", "image": "dnsmasq"},
+            {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base"},
             {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator"}
           ]'
           MATRIX=$(echo "$SERVICES" | jq -c --arg s "${{ inputs.service }}" \
@@ -49,7 +53,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4

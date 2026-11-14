@@ -1,6 +1,6 @@
 services:
   pocketbase:
-    image: ghcr.io/muchobien/pocketbase:0.41
+    image: ghcr.io/muchobien/pocketbase:0.42
     container_name: pocketbase
     restart: unless-stopped
     environment:

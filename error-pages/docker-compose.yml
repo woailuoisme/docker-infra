@@ -9,7 +9,7 @@ services:
       # 开启暗色模式支持 (按客户端系统首选项自适应)
       SHOW_DETAILS: "false"
     healthcheck:
-      test: ["CMD", "/usr/bin/wget", "--spider", "-q", "http://127.0.0.1:8080/healthz"]
+      test: ["CMD", "/bin/httpcheck", "--port-env", "HTTP_PORT", "http://127.0.0.1:8080/healthz"]
       interval: 10s
       timeout: 3s
       retries: 3

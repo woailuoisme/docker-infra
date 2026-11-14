@@ -9,6 +9,7 @@ include:
   - sablier/docker-compose.yml             # Sablier v1.19.1 容器动态实时监控与调度
   - error-pages/docker-compose.yml         # 统一现代化 HTTP 4xx/5xx 自定义美化错误页服务
   - dnsmasq/docker-compose.yml             # DNSMasq 本地 DNS 解析服务
+
   # --- 2. 安全合规与入侵防御 (Security & Compliance) ---
   - crowdsec/docker-compose.yml            # CrowdSec 行为分析、恶意 IP 自动化封禁与 AppSec WAF
   - authelia/docker-compose.yml            # Authelia 2FA / SSO 单点登录与 Web 前置鉴权代理
@@ -29,12 +30,12 @@ include:
   # - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
   - restate/docker-compose.yml             # Restate 轻量事件驱动持久执行与微服务编排引擎
   - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
-  - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板
+  # - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板
 
   # --- 5. 全文检索与动态媒体渲染 (Search & Media Processing) ---
   - meilisearch/docker-compose.yml         # Meilisearch 高性能轻量全文搜索引擎
-  # - sonic/docker-compose.yml               # Sonic 极速轻量低内存全文搜索与联想补全后端
   - imgproxy/docker-compose.yml            # imgproxy 快速安全动态图片缩放、格式协商与裁剪服务
+  # - sonic/docker-compose.yml               # Sonic 极速轻量低内存全文搜索与联想补全后端
 
   # --- 6. 统一可观测性与运维监控 (Observability & Ops) ---
   - otel-collector/docker-compose.yml      # OpenTelemetry Collector 统一遥测日志/指标/追踪收集与清洗
@@ -42,8 +43,8 @@ include:
   - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
   - beszel/docker-compose.yml              # Beszel 轻量级现代化服务器与容器硬件指标看板
   - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
-  - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
-  - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
+  # - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
+  # - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
   # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
   # - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
 
@@ -59,7 +60,7 @@ include:
   - simulator/docker-compose.yml           # IoT 冷链智能售货机集群模拟器 (按需启动: profile iot)
 
   - mailpit/docker-compose.yml             # Mailpit 邮件服务器与 Web 管理界面
-  - trailbase/docker-compose.yml
+  # - trailbase/docker-compose.yml
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
 # ------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+    restart: unless-stopped
     volumes:
       - ./config:/etc/caddy:ro
       - ${DATA_PATH}caddy:/data/caddy
@@ -25,7 +26,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
-    restart: always
     networks:
       - proxy
 

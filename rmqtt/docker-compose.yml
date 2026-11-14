@@ -15,6 +15,6 @@ services:
       - "8883:8883"
       - "11883:11883"
       - "6060:6060"
-    restart: always
+    restart: unless-stopped
     command: -f ./etc/rmqtt.toml --id 1
     privileged: true
