@@ -9,7 +9,7 @@
 
 services:
   atuin:
-    image: ghcr.io/atuinsh/atuin:18.24.8
+    image: ghcr.io/atuinsh/atuin:18.25.1
     container_name: atuin
     restart: unless-stopped
     command: start

@@ -18,14 +18,17 @@ include:
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
   - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
   - pgbouncer/docker-compose.yml
-  # - pgbackups/docker-compose.yml           # PostgreSQL 自动化定时备份与多层轮转归档
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
+  # - postgres19/docker-compose.yml          # PostgreSQL 19 预览版多模数据库
+  # - qdrant/docker-compose.yml              # Qdrant 向量数据库与相似度检索
+  # - surrealdb/docker-compose.yml           # SurrealDB 多模型数据库 (文档/图/时序)
+  # - falkordb/docker-compose.yml            # FalkorDB 图数据库与 Redis 协议查询
 
   # --- 4. 实时通信、消息队列与工作流 (Messaging & Workflows) ---
   - centrifugo/docker-compose.yml          # Centrifugo v6 实时 WebSocket / SSE 广播引擎
   - mosquitto/docker-compose.yml           # Eclipse Mosquitto MQTT 物联网与设备消息 Broker
-  # - rabbitmq/docker-compose.yml            # RabbitMQ AMQP 消息队列与 Web 管理后台
+  # - rmqtt/docker-compose.yml               # RMQTT 高性能 MQTT Broker 集群 (Mosquitto 替代方案)
   # - nats/docker-compose.yml                # NATS 高性能轻量消息与 JetStream 流引擎
   # - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
   - restate/docker-compose.yml             # Restate 轻量事件驱动持久执行与微服务编排引擎
@@ -35,7 +38,6 @@ include:
   # --- 5. 全文检索与动态媒体渲染 (Search & Media Processing) ---
   - meilisearch/docker-compose.yml         # Meilisearch 高性能轻量全文搜索引擎
   - imgproxy/docker-compose.yml            # imgproxy 快速安全动态图片缩放、格式协商与裁剪服务
-  # - sonic/docker-compose.yml               # Sonic 极速轻量低内存全文搜索与联想补全后端
 
   # --- 6. 统一可观测性与运维监控 (Observability & Ops) ---
   - otel-collector/docker-compose.yml      # OpenTelemetry Collector 统一遥测日志/指标/追踪收集与清洗
@@ -44,7 +46,6 @@ include:
   - beszel/docker-compose.yml              # Beszel 轻量级现代化服务器与容器硬件指标看板
   - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
   # - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
-  # - portainer/docker-compose.yml           # Portainer CE 轻量级容器管理与可视化排障面板
   # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
   # - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台
 
@@ -53,6 +54,8 @@ include:
 
   # --- 8. 业务应用与微服务 (Applications & Services) ---
   # - app/docker-compose.yml                 # bgin-api 核心业务服务与异步工作流
+  # - convex/docker-compose.yml              # Convex 全栈后端与实时数据同步引擎
+  # - pocketbase/docker-compose.yml          # PocketBase 单文件后端 (SQLite + 认证 + 实时订阅)
 
   # --- 9. 物联网、时序数据与设备模拟 (IoT & Time-Series Stack) ---
   - influxdb/docker-compose.yml            # InfluxDB 3 Apache Arrow 列式时序引擎与 Web 控制台
