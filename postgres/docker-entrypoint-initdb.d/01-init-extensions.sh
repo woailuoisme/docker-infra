@@ -18,7 +18,7 @@ for db in $DATABASES; do
 		CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 		CREATE EXTENSION IF NOT EXISTS pg_prewarm;
 
-		-- 文本检索与复合/排他索引加速
+		-- 文本检索与复合/排他索引加速 (pg_trgm 等)
 		CREATE EXTENSION IF NOT EXISTS citext;
 		CREATE EXTENSION IF NOT EXISTS pg_trgm;
 		CREATE EXTENSION IF NOT EXISTS btree_gin;

@@ -61,6 +61,7 @@ include:
 
   - mailpit/docker-compose.yml             # Mailpit 邮件服务器与 Web 管理界面
   # - trailbase/docker-compose.yml
+  # - atuin/docker-compose.yml               # Atuin 终端命令历史加密同步服务端 (SQLite)
 # ------------------------------------------------------------------------------
 # 顶层集群共享网络定义 (Global Overlay / Bridge Networks)
 # ------------------------------------------------------------------------------

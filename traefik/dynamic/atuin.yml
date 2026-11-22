@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+# ==============================================================================
+# Atuin 终端历史同步服务端路由配置 (Atuin Router & Service)
+# 挂载 chain-api@file 中间件链路（不套 Authelia SSO，兼容 Atuin CLI 同步请求）
+# ==============================================================================
+
+http:
+  routers:
+    atuin:
+      rule: 'Host(`atuin.{{ env "SITE_ADDRESS" }}`)'
+      entryPoints:
+        - websecure
+      service: atuin-service
+      tls: {}
+      middlewares:
+        - chain-api@file
+
+  services:
+    atuin-service:
+      loadBalancer:
+        servers:
+          - url: "http://atuin:8888"
+        passHostHeader: true

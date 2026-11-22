@@ -1,0 +1,11 @@
+services:
+  falkordb:
+    image: falkordb/falkordb:v4.22.4
+    container_name: falkordb
+    restart: unless-stopped
+    # 对应 docker run -p 6379:6379 -p 3000:3000 -v ./data:/var/lib/falkordb/data
+    ports:
+      - "6379:6379" # Redis 协议
+      - "3000:3000" # FalkorDB Browser
+    volumes:
+      - ./data:/var/lib/falkordb/data

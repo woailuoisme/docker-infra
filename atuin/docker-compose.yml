@@ -1,0 +1,34 @@
+# ==============================================================================
+# Atuin - 终端命令历史同步与检索服务端 (Shell History Sync Server)
+# ==============================================================================
+# 【核心功能与定位】
+# 1. 加密历史同步：跨多台设备安全同步 Shell 命令历史，支持端到端加密。
+# 2. 轻量单容器架构：使用官方 Tier-1 支持的 SQLite 后端，适合 1~10 人私有生产环境。
+# 3. 安全收口：不暴露宿主机端口，完全经由 Traefik 反向代理 (atuin.${SITE_ADDRESS}) 提供 HTTPS。
+# ==============================================================================
+
+services:
+  atuin:
+    image: ghcr.io/atuinsh/atuin:18.24.8
+    container_name: atuin
+    restart: unless-stopped
+    command: start
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ${DATA_PATH:-./data/}atuin:/config
+    environment:
+      TZ: ${TIMEZONE:-Asia/Shanghai}
+      ATUIN_HOST: "0.0.0.0"
+      ATUIN_PORT: "8888"
+      # 首次注册完成后，建议在 .env 中设置 ATUIN_OPEN_REGISTRATION=false 关闭公开注册
+      ATUIN_OPEN_REGISTRATION: "${ATUIN_OPEN_REGISTRATION:-true}"
+      ATUIN_DB_URI: "sqlite:///config/atuin.db"
+      RUST_LOG: info
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - frontend
+      - backend
