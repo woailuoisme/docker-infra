@@ -57,6 +57,7 @@ entryPoints:
   web:
     address: ":80"
     http:
+      aliasHeadersStrategy: delete
       redirections:
         entryPoint:
           to: websecure
@@ -69,6 +70,18 @@ entryPoints:
     http3: {}
     http:
       tls: {}
+      # 剔除名称包含非字母/数字/短横线的别名请求头，防止伪造 Authelia 等信任头
+      aliasHeadersStrategy: delete
+      # 严格过滤请求路径中的保留编码字符，防止 Split-View 路径解析差异与目录穿越攻击 (RFC 3986)
+      # 注意: 仅作用于 URL Path，不影响 Query 参数；若特定业务(如 S3 对象名/Temporal ID)确需在 Path 中传 %2F，可将该项改回 true
+      encodedCharacters:
+        allowEncodedSlash: false          # 拒绝 %2f / %2F (/)
+        allowEncodedBackSlash: false      # 拒绝 %5c / %5C (\)
+        allowEncodedNullCharacter: false  # 拒绝 %00 (NULL)
+        allowEncodedSemicolon: false      # 拒绝 %3b / %3B (;)
+        allowEncodedPercent: false        # 拒绝 %25 (%)
+        allowEncodedQuestionMark: false   # 拒绝 %3f / %3F (?)
+        allowEncodedHash: false           # 拒绝 %23 (#)
       middlewares:
         - crowdsec-bouncer@file
         - error-pages@file
@@ -76,10 +89,19 @@ entryPoints:
   # Prometheus 监控指标专用内部入口点 (由 vmagent 内部抓取，不暴露公网)
   metrics:
     address: ":8082"
+    http:
+      aliasHeadersStrategy: delete
 
   # MQTTS 物联网设备安全入口 (TCP 8883，专供 MQTT over TLS 设备连接)
   mqtts:
     address: ":8883"
+    http:
+      aliasHeadersStrategy: delete
+
+  # 内部探针入口点 (由 ping 自动使用，未配置 address 时默认 :8080，显式声明以消除未配置告警)
+  traefik:
+    http:
+      aliasHeadersStrategy: delete
 
 # ------------------------------------------------------------------------------
 # 配置提供者 (Providers)

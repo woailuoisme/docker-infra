@@ -3,14 +3,7 @@ FROM postgres:${POSTGRES_VERSION}
 LABEL maintainer="seaside <531773730@qq.com>"
 
 ARG TZ=Asia/Shanghai
-ARG CHINA=false
 
-# 切换镜像源 (Debian Trixie)
-RUN if [ "$CHINA" = "true" ]; then \
-    sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources; \
-    fi
-
-# 添加 PostgreSQL 官方 PGDG 仓库
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
@@ -21,36 +14,42 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 定义扩展版本参数（Debian 13 / trixie 对应 PGDG 构建后缀 pgdg13+1 / pgdg13+2）
 ARG PGCRON_VERSION=1.6.8-1.pgdg13+3
 ARG POSTGIS_VERSION=3.7.0+dfsg-1.pgdg13+2
 ARG PGVECTOR_VERSION=0.8.7-1.pgdg13+2
+# pgroonga 不在 PGDG 源，需额外引入 Groonga 官方源
+ARG PGROONGA_VERSION=4.1.0-1
 
-# 安装核心扩展：地理空间 (PostGIS)、向量 (pgvector)、定时调度 (pg_cron) 及云备份工具 (barman-cli-cloud)
+# 扩展开关，false 可裁掉对应扩展
+ARG WITH_PGROONGA=true
+ARG WITH_POSTGIS=true
+ARG WITH_PGVECTOR=true
+ARG WITH_PGCRON=true
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    postgresql-18-postgis-3="${POSTGIS_VERSION}" \
-    postgresql-18-pgvector="${PGVECTOR_VERSION}" \
-    postgresql-18-cron="${PGCRON_VERSION}" \
-    barman-cli-cloud \
-    pigz \
     tzdata \
+    && if [ "$WITH_POSTGIS" = "true" ]; then apt-get install -y --no-install-recommends postgresql-18-postgis-3="${POSTGIS_VERSION}"; fi \
+    && if [ "$WITH_PGVECTOR" = "true" ]; then apt-get install -y --no-install-recommends postgresql-18-pgvector="${PGVECTOR_VERSION}"; fi \
+    && if [ "$WITH_PGCRON" = "true" ]; then apt-get install -y --no-install-recommends postgresql-18-cron="${PGCRON_VERSION}"; fi \
+    && if [ "$WITH_PGROONGA" = "true" ]; then \
+        curl -fsSLo /tmp/groonga.deb https://packages.groonga.org/debian/groonga-apt-source-latest-trixie.deb \
+        && apt-get install -y /tmp/groonga.deb && apt-get update \
+        && apt-get install -y --no-install-recommends postgresql-18-pgdg-pgroonga="${PGROONGA_VERSION}" \
+        && rm /tmp/groonga.deb; \
+    fi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 设置系统时区
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/TZ
 
-# 复制优化后的配置文件与统一运维 CLI 工具
 COPY postgresql.conf /etc/postgresql/postgresql.conf
-COPY scripts/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/pg-cloud
+COPY pg_hba.conf /etc/postgresql/pg_hba.conf
+# pg_cron 未安装时必须从 preload 移除，否则 Postgres 启动即失败（pgroonga 无需 preload）
+RUN if [ "$WITH_PGCRON" != "true" ]; then sed -i 's/pg_cron,//' /etc/postgresql/postgresql.conf; fi
 
-# 复制扩展初始化脚本
 COPY docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 
-# 设置环境变量
 ENV POSTGRES_CONFIG_FILE=/etc/postgresql/postgresql.conf
 
-# 使用原始入口点，通过 CMD 传递配置参数
 CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
 HEALTHCHECK --interval=60s --timeout=10s --retries=5 --start-period=60s \

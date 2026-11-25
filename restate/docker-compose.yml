@@ -1,6 +1,6 @@
 services:
   restate:
-    image: docker.restate.dev/restatedev/restate:1.8
+    image: restatedev/restate:1.8
     container_name: restate
     restart: unless-stopped
     ports:

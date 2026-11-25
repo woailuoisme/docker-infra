@@ -21,7 +21,7 @@ include:
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
   # - postgres19/docker-compose.yml          # PostgreSQL 19 预览版多模数据库
-  # - qdrant/docker-compose.yml              # Qdrant 向量数据库与相似度检索
+  - qdrant/docker-compose.yml              # Qdrant 向量数据库与相似度检索
   # - surrealdb/docker-compose.yml           # SurrealDB 多模型数据库 (文档/图/时序)
   # - falkordb/docker-compose.yml            # FalkorDB 图数据库与 Redis 协议查询
 
@@ -31,7 +31,7 @@ include:
   # - rmqtt/docker-compose.yml               # RMQTT 高性能 MQTT Broker 集群 (Mosquitto 替代方案)
   # - nats/docker-compose.yml                # NATS 高性能轻量消息与 JetStream 流引擎
   # - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
-  - restate/docker-compose.yml             # Restate 轻量事件驱动持久执行与微服务编排引擎
+  # - restate/docker-compose.yml             # Restate 轻量事件驱动持久执行与微服务编排引擎
   - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
   # - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板
 
@@ -45,6 +45,7 @@ include:
   - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
   - beszel/docker-compose.yml              # Beszel 轻量级现代化服务器与容器硬件指标看板
   - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
+  - databasus/docker-compose.yml           # Databasus 数据库备份恢复 (postgres → garage S3)
   # - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
   # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台
   # - grafana/docker-compose.yml             # Grafana 13.x 统一时序数据监控、Arrow Flight SQL 与 IoT 看板平台

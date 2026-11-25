@@ -1,0 +1,21 @@
+services:
+  databasus:
+    image: databasus/databasus:v3.72.0
+    container_name: databasus
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+    ports:
+      - "4005:4005"
+    volumes:
+      - ${DATA_PATH}databasus:/databasus-data
+    # 内置数据库，无需外部 PG；备份源与存储均在 UI 内配置：
+    # 源库 postgres:5432、目标 S3 http://garage:3900 + GARAGE_DEFAULT_ACCESS_KEY/SECRET
+    healthcheck:
+      test: ["CMD", "databasus", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    networks:
+      - backend

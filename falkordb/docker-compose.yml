@@ -1,11 +1,15 @@
 services:
   falkordb:
-    image: falkordb/falkordb:v4.22.4
+    image: falkordb/falkordb:6.2.0-redis
     container_name: falkordb
     restart: unless-stopped
-    # 对应 docker run -p 6379:6379 -p 3000:3000 -v ./data:/var/lib/falkordb/data
     ports:
-      - "6379:6379" # Redis 协议
-      - "3000:3000" # FalkorDB Browser
+      - "7379:6379" # Redis 协议
+      - "3001:3000" # FalkorDB Browser
+    environment:
+      - REDIS_ARGS=--requirepass ${FALKORDB_PASSWORD}
+      - AUTH_SECRET=${FALKORDB_AUTH_SECRET}
+      - ENCRYPTION_KEY=${FALKORDB_ENCRYPTION_KEY}
     volumes:
-      - ./data:/var/lib/falkordb/data
+      - ${DATA_PATH}/falkordb_data:/var/lib/falkordb/data
+      - ${DATA_PATH}/falkordb_browser:/app/.data

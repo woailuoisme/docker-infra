@@ -10,24 +10,23 @@ for db in $DATABASES; do
 	echo "Initializing extensions for database: ${db}"
 
 	psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$db" <<- 'EOSQL'
-		-- 核心特化：空间地理、向量检索 (HNSW/IVFFlat)
-		CREATE EXTENSION IF NOT EXISTS postgis;
-		CREATE EXTENSION IF NOT EXISTS vector;
-
-		-- 性能监控与缓存预热
+		-- 性能监控
 		CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
-		CREATE EXTENSION IF NOT EXISTS pg_prewarm;
 
-		-- 文本检索与复合/排他索引加速 (pg_trgm 等)
-		CREATE EXTENSION IF NOT EXISTS citext;
+		-- 文本模糊检索
 		CREATE EXTENSION IF NOT EXISTS pg_trgm;
-		CREATE EXTENSION IF NOT EXISTS btree_gin;
-		CREATE EXTENSION IF NOT EXISTS btree_gist;
 		CREATE EXTENSION IF NOT EXISTS ltree;
 	EOSQL
 
+	# 可选扩展：可能被构建参数 (WITH_*=false) 关闭，装上了才创建
+	for ext in postgis vector pgroonga; do
+		if psql -XtA -c "SELECT 1 FROM pg_available_extensions WHERE name = '$ext'" --username "$POSTGRES_USER" --dbname "$db" | grep -q 1; then
+			psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$db" -c "CREATE EXTENSION IF NOT EXISTS ${ext} CASCADE;"
+		fi
+	done
+
 	# pg_cron 仅在 cron.database_name (即 postgres) 中安装
-	if [ "$db" = "postgres" ]; then
+	if [ "$db" = "postgres" ] && psql -XtA -c "SELECT 1 FROM pg_available_extensions WHERE name = 'pg_cron'" --username "$POSTGRES_USER" --dbname "postgres" | grep -q 1; then
 		psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "postgres" -c "CREATE EXTENSION IF NOT EXISTS pg_cron;"
 		echo "Extension pg_cron installed in postgres database."
 	fi
