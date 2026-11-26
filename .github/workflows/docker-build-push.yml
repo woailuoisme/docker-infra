@@ -3,18 +3,22 @@ name: Build and Push Docker Images
 on:
   workflow_dispatch:
     inputs:
-      service:
-        description: "Select service to build and push"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - all
-          - postgres
-          - postgres19
-          - dnsmasq
-          - caddy-base
-          - simulator
+      postgres:
+        description: "Build & Push postgres (18-trixie)"
+        type: boolean
+        default: false
+      postgres19:
+        description: "Build & Push postgres19 (19-trixie)"
+        type: boolean
+        default: false
+      caddy-base:
+        description: "Build & Push caddy-base"
+        type: boolean
+        default: false
+      simulator:
+        description: "Build & Push simulator"
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,24 +34,38 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_targets: ${{ steps.set-matrix.outputs.has_targets }}
     steps:
       - name: Generate build matrix
         id: set-matrix
         run: |
+          SELECTED=$(jq -n -c \
+            --argjson pg "${{ inputs.postgres }}" \
+            --argjson pg19 "${{ inputs.postgres19 }}" \
+            --argjson caddy "${{ inputs.caddy-base }}" \
+            --argjson sim "${{ inputs.simulator }}" \
+            '[
+              (if $pg then "postgres" else empty end),
+              (if $pg19 then "postgres19" else empty end),
+              (if $caddy then "caddy-base" else empty end),
+              (if $sim then "simulator" else empty end)
+            ]')
           SERVICES='[
             {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres", "tag": "18-trixie", "enable_latest": true},
             {"service": "postgres19", "context": "./postgres19", "file": "./postgres19/Dockerfile", "image": "postgres", "tag": "19-trixie", "enable_latest": false},
-            {"service": "dnsmasq", "context": "./dnsmasq", "file": "./dnsmasq/Dockerfile", "image": "dnsmasq", "tag": "", "enable_latest": true},
             {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base", "tag": "", "enable_latest": true},
             {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator", "tag": "", "enable_latest": true}
           ]'
-          MATRIX=$(echo "$SERVICES" | jq -c --arg s "${{ inputs.service }}" \
-            'if $s == "all" or $s == "" then {include: .} else {include: [.[] | select(.service == $s)]} end')
+          MATRIX=$(echo "$SERVICES" | jq -c --argjson sel "$SELECTED" \
+            '{include: [.[] | select(.service as $s | $sel | index($s) != null)]}')
+          HAS_TARGETS=$(echo "$MATRIX" | jq -r '(.include | length) > 0')
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "has_targets=$HAS_TARGETS" >> "$GITHUB_OUTPUT"
 
   build-and-push:
     name: Build & Push (${{ matrix.service }})
     needs: prepare
+    if: needs.prepare.outputs.has_targets == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
