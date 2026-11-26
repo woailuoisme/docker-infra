@@ -16,11 +16,11 @@ include:
   - open-bao/docker-compose.yml            # OpenBao 安全凭据、KV v2 核心机密引擎与 AppRole 访问控制
 
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
-  - postgres/docker-compose.yml            # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
+  - postgres/docker-compose.production.yml # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
   - pgbouncer/docker-compose.yml
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
-  # - postgres19/docker-compose.yml          # PostgreSQL 19 预览版多模数据库
+  # - postgres19/docker-compose.production.yml # PostgreSQL 19 预览版多模数据库
   - qdrant/docker-compose.yml              # Qdrant 向量数据库与相似度检索
   # - surrealdb/docker-compose.yml           # SurrealDB 多模型数据库 (文档/图/时序)
   # - falkordb/docker-compose.yml            # FalkorDB 图数据库与 Redis 协议查询
@@ -45,6 +45,7 @@ include:
   - dozzle/docker-compose.yml              # Dozzle 容器运行状态与流式日志实时查看面板
   - beszel/docker-compose.yml              # Beszel 轻量级现代化服务器与容器硬件指标看板
   - beszel-agent/docker-compose.yml        # Beszel Agent 宿主机指标采集探针
+  - arcane/docker-compose.yml
   - databasus/docker-compose.yml           # Databasus 数据库备份恢复 (postgres → garage S3)
   # - gatus/docker-compose.yml               # Gatus 自动化服务健康检查与状态页看板
   # - umami/docker-compose.yml               # Umami 现代化轻量网站分析与用户行为洞察平台

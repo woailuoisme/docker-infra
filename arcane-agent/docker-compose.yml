@@ -1,0 +1,17 @@
+# Agent - connects outbound, no exposed ports required
+services:
+  arcane-agent:
+    image: ghcr.io/getarcaneapp/agent:latest
+    container_name: arcane-agent
+    restart: unless-stopped
+    environment:
+      - ARCANE_AGENT=true
+      - ARCANE_AGENT_TRANSPORT=auto
+      - ARCANE_AGENT_TOKEN=arc_etkn_c595b57d0d69919bf9a12dc0ee15e9c0f2f63cbd18d0fda509b2482f6768f5f9
+      - ARCANE_MANAGER_API_URL=http://localhost:3552
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - arcane-data:/app/data
+
+volumes:
+  arcane-data:

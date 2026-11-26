@@ -1,29 +1,11 @@
+# ==============================================================================
+# PostgreSQL 18 自定义镜像构建与推送配置 (Build & Push Only)
+# 本地构建: docker compose -f postgres/docker-compose.yml build
+# 运行启动请使用: postgres/docker-compose.production.yml
+# ==============================================================================
 services:
   postgres:
-    container_name: postgres
+    image: ghcr.io/woailuoisme/docker-infra/postgres:18-trixie
     build:
       context: .
-    restart: unless-stopped
-    # 共享内存：预留给 shared_buffers (256MB) 与并行查询/动态共享内存段 (DSM)
-    shm_size: 512mb
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - TZ=${TIMEZONE:-Asia/Shanghai}
-    volumes:
-      - ${DATA_PATH}postgres18:/var/lib/postgresql
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
-      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB:-postgres} -U ${POSTGRES_USER:-postgres}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-
-    networks:
-      - backend
+      dockerfile: Dockerfile

@@ -11,6 +11,7 @@ on:
         options:
           - all
           - postgres
+          - postgres19
           - dnsmasq
           - caddy-base
           - simulator
@@ -34,10 +35,11 @@ jobs:
         id: set-matrix
         run: |
           SERVICES='[
-            {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres"},
-            {"service": "dnsmasq", "context": "./dnsmasq", "file": "./dnsmasq/Dockerfile", "image": "dnsmasq"},
-            {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base"},
-            {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator"}
+            {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres", "tag": "18-trixie", "enable_latest": true},
+            {"service": "postgres19", "context": "./postgres19", "file": "./postgres19/Dockerfile", "image": "postgres", "tag": "19-trixie", "enable_latest": false},
+            {"service": "dnsmasq", "context": "./dnsmasq", "file": "./dnsmasq/Dockerfile", "image": "dnsmasq", "tag": "", "enable_latest": true},
+            {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base", "tag": "", "enable_latest": true},
+            {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator", "tag": "", "enable_latest": true}
           ]'
           MATRIX=$(echo "$SERVICES" | jq -c --arg s "${{ inputs.service }}" \
             'if $s == "all" or $s == "" then {include: .} else {include: [.[] | select(.service == $s)]} end')
@@ -74,13 +76,14 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
           flavor: |
-            latest=auto
+            latest=false
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=,format=short
+            type=raw,value=${{ matrix.tag }},enable=${{ matrix.tag != '' }}
+            type=raw,value=latest,enable=${{ matrix.enable_latest && github.ref_name == github.event.repository.default_branch }}
+            type=ref,event=branch,enable=${{ matrix.service != 'postgres19' }}
+            type=semver,pattern={{version}},enable=${{ matrix.service != 'postgres19' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ matrix.service != 'postgres19' }}
+            type=sha,prefix=${{ matrix.tag != '' && format('{0}-', matrix.tag) || '' }},format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7

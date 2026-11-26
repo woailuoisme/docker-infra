@@ -1,0 +1,20 @@
+services:
+  arcane:
+    image: ghcr.io/getarcaneapp/manager:latest
+    container_name: arcane
+    ports:
+      - "3552:3552"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA_PATH}arcane:/app/data
+    environment:
+      - TZ=${TIMEZONE:-Asia/Shanghai}
+      - ARCANE_APP_URL=http://localhost:3552
+      - PUID=1000
+      - PGID=1000
+      - ARCANE_ENCRYPTION_KEY=${ARCANE_ENCRYPTION_KEY}
+    cgroup: host
+    restart: unless-stopped
+    networks:
+      - backend
+
