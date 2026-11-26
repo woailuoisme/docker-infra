@@ -24,7 +24,7 @@ ARG PGROONGA_VERSION=4.1.0-1
 ARG WITH_PGROONGA=true
 ARG WITH_POSTGIS=true
 ARG WITH_PGVECTOR=true
-ARG WITH_PGCRON=true
+ARG WITH_PGCRON=false
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
@@ -32,10 +32,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && if [ "$WITH_PGVECTOR" = "true" ]; then apt-get install -y --no-install-recommends postgresql-18-pgvector="${PGVECTOR_VERSION}"; fi \
     && if [ "$WITH_PGCRON" = "true" ]; then apt-get install -y --no-install-recommends postgresql-18-cron="${PGCRON_VERSION}"; fi \
     && if [ "$WITH_PGROONGA" = "true" ]; then \
-        curl -fsSLo /tmp/groonga.deb https://packages.groonga.org/debian/groonga-apt-source-latest-trixie.deb \
-        && apt-get install -y /tmp/groonga.deb && apt-get update \
-        && apt-get install -y --no-install-recommends postgresql-18-pgdg-pgroonga="${PGROONGA_VERSION}" \
-        && rm /tmp/groonga.deb; \
+    curl -fsSLo /tmp/groonga.deb https://packages.groonga.org/debian/groonga-apt-source-latest-trixie.deb \
+    && apt-get install -y /tmp/groonga.deb && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-18-pgdg-pgroonga="${PGROONGA_VERSION}" \
+    && rm /tmp/groonga.deb; \
     fi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
