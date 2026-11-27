@@ -21,10 +21,10 @@ ARG PGVECTOR_VERSION=0.8.7-1.pgdg13+2
 ARG PGROONGA_VERSION=4.1.0-1
 
 # 扩展开关，false 可裁掉对应扩展
-ARG WITH_PGROONGA=true
 ARG WITH_POSTGIS=true
 ARG WITH_PGVECTOR=true
-ARG WITH_PGCRON=false
+ARG WITH_PGROONGA=true
+ARG WITH_PGCRON=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
