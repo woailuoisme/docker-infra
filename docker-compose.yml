@@ -16,7 +16,7 @@ include:
   - open-bao/docker-compose.yml            # OpenBao 安全凭据、KV v2 核心机密引擎与 AppRole 访问控制
 
   # --- 3. 核心持久化与数据库 (Databases & Storage) ---
-  - postgres/docker-compose.production.yml # PostgreSQL 18 + TimescaleDB + pgvector + PostGIS 核心多模数据库
+  - postgres/docker-compose.prd.yml # PostgreSQL 18 + pgvector + PostGIS 核心多模数据库
   - pgbouncer/docker-compose.yml
   - valkey/docker-compose.yml              # Valkey 8.0 高性能内存键值缓存与分布式锁
   - garage/docker-compose.yml              # Garage 轻量级分布式 S3 对象存储与 WebUI 控制台
@@ -28,9 +28,7 @@ include:
   # --- 4. 实时通信、消息队列与工作流 (Messaging & Workflows) ---
   - centrifugo/docker-compose.yml          # Centrifugo v6 实时 WebSocket / SSE 广播引擎
   - mosquitto/docker-compose.yml           # Eclipse Mosquitto MQTT 物联网与设备消息 Broker
-  # - rmqtt/docker-compose.yml               # RMQTT 高性能 MQTT Broker 集群 (Mosquitto 替代方案)
   # - nats/docker-compose.yml                # NATS 高性能轻量消息与 JetStream 流引擎
-  # - temporal/docker-compose.yml            # Temporal 分布式微服务编排与持久工作流引擎
   # - restate/docker-compose.yml             # Restate 轻量事件驱动持久执行与微服务编排引擎
   - asynqmon/docker-compose.yml            # Asynq 分布式异步任务队列 Web 监控看板
   # - bull-board/docker-compose.yml          # Bull / BullMQ 异步队列 Web 监控看板

@@ -4,7 +4,6 @@
 # 使用环境变量格式: {{HOMEPAGE_VAR_SITE_ADDRESS}}
 # ==============================================================================
 
-
 - 网关与安全:
     - Traefik:
         icon: traefik
@@ -81,7 +80,7 @@
 - 存储与数据库:
     - PostgreSQL:
         icon: postgresql
-        description: PostgreSQL 18 + TimescaleDB 核心数据库
+        description: PostgreSQL 核心数据库
         server: my-docker
         container: postgres
 
@@ -124,7 +123,6 @@
         description: IoT 遥测指标收集与转换 Agent
         server: my-docker
         container: telegraf
-
 
     - Temporal:
         icon: si-temporal

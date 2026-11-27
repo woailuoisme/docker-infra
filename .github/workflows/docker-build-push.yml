@@ -51,10 +51,10 @@ jobs:
               (if $sim then "simulator" else empty end)
             ]')
           SERVICES='[
-            {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres", "tag": "18-trixie", "enable_latest": true},
-            {"service": "postgres19", "context": "./postgres19", "file": "./postgres19/Dockerfile", "image": "postgres", "tag": "19-trixie", "enable_latest": false},
-            {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base", "tag": "", "enable_latest": true},
-            {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator", "tag": "", "enable_latest": true}
+            {"service": "postgres", "context": "./postgres", "file": "./postgres/Dockerfile", "image": "postgres", "tag": "18-trixie"},
+            {"service": "postgres19", "context": "./postgres19", "file": "./postgres19/Dockerfile", "image": "postgres", "tag": "19-trixie"},
+            {"service": "caddy-base", "context": "./caddy-base", "file": "./caddy-base/Dockerfile", "image": "caddy-base", "tag": ""},
+            {"service": "simulator", "context": "./simulator", "file": "./simulator/Dockerfile", "image": "simulator", "tag": ""}
           ]'
           MATRIX=$(echo "$SERVICES" | jq -c --argjson sel "$SELECTED" \
             '{include: [.[] | select(.service as $s | $sel | index($s) != null)]}')
@@ -97,11 +97,11 @@ jobs:
             latest=false
           tags: |
             type=raw,value=${{ matrix.tag }},enable=${{ matrix.tag != '' }}
-            type=raw,value=latest,enable=${{ matrix.enable_latest && github.ref_name == github.event.repository.default_branch }}
-            type=ref,event=branch,enable=${{ matrix.service != 'postgres19' }}
-            type=semver,pattern={{version}},enable=${{ matrix.service != 'postgres19' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ matrix.service != 'postgres19' }}
-            type=sha,prefix=${{ matrix.tag != '' && format('{0}-', matrix.tag) || '' }},format=short
+            type=raw,value=latest,enable=${{ matrix.tag == '' && github.ref_name == github.event.repository.default_branch }}
+            type=ref,event=branch,enable=${{ matrix.tag == '' }}
+            type=semver,pattern={{version}},enable=${{ matrix.tag == '' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ matrix.tag == '' }}
+            type=sha,prefix=,format=short,enable=${{ matrix.tag == '' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7

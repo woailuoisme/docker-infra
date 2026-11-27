@@ -119,11 +119,14 @@ INFLUXDB_TOKEN=apiv3_zXwIQ_nNIx-XsUN858t6lBQGkZ2tZljUdZA0TzpLp_0GJh6r6BaxnCddiaX
 
 1. **InfluxDB 3 Explorer (数据可视化)**
    - **本地直连**: `http://localhost:8810`
+
    - **Traefik 域名**: `https://influx.test.local` (或 `https://influxdb.test.local`)
+
    - **初次连接配置**:
      - Server URL: `http://influxdb:8181` (容器间直连) 或 `http://localhost:8181` (本地直连)
      - API Token: 填写 `.env` 中的 `INFLUXDB_TOKEN`
      - Database: `iot`
+
    - 可在 UI 中使用标准 SQL 执行查询：
 
      ```sql
